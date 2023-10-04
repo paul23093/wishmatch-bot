@@ -42,14 +42,49 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     )
 
 
-async def access(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+async def grant_access(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     user = update.effective_user
     chat = update.effective_chat
-    query = update.callback_query
 
-    if query.data == "grant_access":
-        with psycopg2.connect(**con) as conn:
-            cur = conn.cursor()
+    with psycopg2.connect(**con) as conn:
+        cur = conn.cursor()
+
+        cur.execute(f"""
+        select count(*)>0 as is_user_exists
+        from users
+        where tg_user_id = {user.id}
+        ;
+        """)
+
+        data_u = [dict((cur.description[i][0], value) for i, value in enumerate(row)) for row in cur.fetchall()][0]
+        if not data_u["is_user_exists"]:
+
+            cur.execute(f"""
+            insert into users (
+                tg_user_id, 
+                tg_username,
+                tg_first_name,
+                tg_last_name
+            ) 
+            values (
+                {user.id}, 
+                {f"'{user.username}'" if user.username else "NULL"},
+                {f"'{user.first_name}'" if user.first_name else "NULL"},
+                {f"'{user.last_name}'" if user.last_name else "NULL"},
+            );
+            """)
+            conn.commit()
+
+        cur.execute(f"""
+                select count(*)>0 as is_user_permission_exists
+                from users
+                where tg_user_id = {user.id}
+                and tg_chat_id = {chat.id}
+                ;
+                """)
+
+        data_up = [dict((cur.description[i][0], value) for i, value in enumerate(row)) for row in cur.fetchall()][0]
+        if not data_up["is_user_permission_exists"]:
             cur.execute(f"""
             insert into permissions (
                 tg_user_id, 
@@ -61,39 +96,43 @@ async def access(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
             );""")
             conn.commit()
 
-        await update.effective_message.edit_reply_markup(
-            reply_markup=InlineKeyboardMarkup.from_button(
-                button=InlineKeyboardButton(
-                    text="Revoke access",
-                    callback_data="revoke_access"
-                ),
-            )
+    await update.effective_message.edit_reply_markup(
+        reply_markup=InlineKeyboardMarkup.from_button(
+            button=InlineKeyboardButton(
+                text="Revoke access",
+                callback_data="revoke_access"
+            ),
         )
+    )
 
-    elif query.data == "revoke_access":
-        with psycopg2.connect(**con) as conn:
-            cur = conn.cursor()
-            cur.execute(f"""
-            delete from permissions 
-            where tg_user_id = {user.id}
-            and tg_chat_id = {chat.id};""")
-            conn.commit()
 
-        await update.effective_message.edit_reply_markup(
-            reply_markup=InlineKeyboardMarkup.from_button(
-                button=InlineKeyboardButton(
-                    text="Provide access to your wishes",
-                    callback_data="grant_access"
-                ),
-            )
+async def revoke_access(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+    user = update.effective_user
+    chat = update.effective_chat
+    with psycopg2.connect(**con) as conn:
+        cur = conn.cursor()
+        cur.execute(f"""
+        delete from permissions 
+        where tg_user_id = {user.id}
+        and tg_chat_id = {chat.id};""")
+        conn.commit()
+
+    await update.effective_message.edit_reply_markup(
+        reply_markup=InlineKeyboardMarkup.from_button(
+            button=InlineKeyboardButton(
+                text="Provide access to your wishes",
+                callback_data="grant_access"
+            ),
         )
+    )
 
 
 def main() -> None:
     application = ApplicationBuilder().token(token).build()
 
     application.add_handler(CommandHandler("start", start))
-    application.add_handler(CallbackQueryHandler(access))
+    application.add_handler(CommandHandler("grant", grant_access))
+    application.add_handler(CommandHandler("revoke", revoke_access))
 
     application.run_polling(allowed_updates=Update.ALL_TYPES)
 
