@@ -106,7 +106,7 @@ async def grant_access(update: Update, context: ContextTypes.DEFAULT_TYPE) -> No
             conn.commit()
 
     await update.effective_message.reply_text(
-        text="You have successfully shared your wishes with this chat."
+        text="You have successfully shared your wishes with the chat."
     )
 
 
@@ -124,7 +124,7 @@ async def revoke_access(update: Update, context: ContextTypes.DEFAULT_TYPE) -> N
         conn.commit()
 
     await update.effective_message.reply_text(
-        text="You have successfully hid your wishes with this chat."
+        text="You have successfully hidden your wishes from the chat."
     )
 
 
