@@ -1,0 +1,10 @@
+version: "3"
+services:
+
+  webapp:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    command: python app.py
+    env_file:
+      - /var/www/wm_webapp/.env

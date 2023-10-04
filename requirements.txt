@@ -1,0 +1,5 @@
+aiofiles==23.2.1
+psycopg2-binary==2.9.8
+python-dotenv==1.0.0
+python-telegram-bot==20.6
+nest-asyncio==1.5.8
