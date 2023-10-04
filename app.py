@@ -96,13 +96,17 @@ async def grant_access(update: Update, context: ContextTypes.DEFAULT_TYPE) -> No
             );""")
             conn.commit()
 
-    await update.effective_message.edit_reply_markup(
-        reply_markup=InlineKeyboardMarkup.from_button(
-            button=InlineKeyboardButton(
-                text="Revoke access",
-                callback_data="revoke_access"
-            ),
-        )
+        else:
+            cur.execute(f"""
+            update permissions 
+            set is_deleted = false
+            where tg_user_id = {user.id}
+            and tg_chat_id = {chat.id}
+            ;""")
+            conn.commit()
+
+    await update.effective_message.reply_text(
+        text="You have successfully shared your wishes with this chat."
     )
 
 
@@ -112,18 +116,15 @@ async def revoke_access(update: Update, context: ContextTypes.DEFAULT_TYPE) -> N
     with psycopg2.connect(**con) as conn:
         cur = conn.cursor()
         cur.execute(f"""
-        delete from permissions 
+        update permissions 
+        set is_deleted = true
         where tg_user_id = {user.id}
-        and tg_chat_id = {chat.id};""")
+        and tg_chat_id = {chat.id}
+        ;""")
         conn.commit()
 
-    await update.effective_message.edit_reply_markup(
-        reply_markup=InlineKeyboardMarkup.from_button(
-            button=InlineKeyboardButton(
-                text="Provide access to your wishes",
-                callback_data="grant_access"
-            ),
-        )
+    await update.effective_message.reply_text(
+        text="You have successfully hid your wishes with this chat."
     )
 
 
