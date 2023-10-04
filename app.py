@@ -77,7 +77,7 @@ async def grant_access(update: Update, context: ContextTypes.DEFAULT_TYPE) -> No
 
         cur.execute(f"""
             select count(*)>0 as is_user_permission_exists
-            from users
+            from permissions
             where tg_user_id = {user.id}
             and tg_chat_id = {chat.id}
             ;
