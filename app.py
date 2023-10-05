@@ -88,7 +88,7 @@ async def grant_access(update: Update, context: ContextTypes.DEFAULT_TYPE) -> No
             ) 
             values (
                 {chat.id}, 
-                {chat.title}
+                '{chat.title}'
             );
             """)
             conn.commit()
