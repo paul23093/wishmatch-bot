@@ -25,22 +25,13 @@ con = {
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     user = update.effective_user
     chat = update.effective_chat
-    reply_markup = InlineKeyboardMarkup([
-        [
-            InlineKeyboardButton(
-                text="Provide access to your wishes",
-                callback_data="grant_access"
-            )
-        ]
-    ]
-    )
 
     await context.bot.set_chat_menu_button(
         chat_id=user.id,
         menu_button=MenuButtonWebApp(
             text="Open",
             web_app=WebAppInfo(
-                url=f"https://t.me/wishmatch_bot/wishes?startapp={chat.id}"
+                url=f"https://havka.one?chat_id={chat.id}"
             )
         )
     )
@@ -49,7 +40,6 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
         text=f"Hi {user.username}\n\nLaunch [WishMatch](https://t.me/wishmatch_bot/wishes?startapp={chat.id})",
         chat_id=chat.id,
         parse_mode=ParseMode.MARKDOWN_V2,
-        reply_markup=reply_markup,
     )
 
 
