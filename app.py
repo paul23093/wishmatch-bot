@@ -46,7 +46,7 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     # )
 
     await context.bot.send_message(
-        text=f"Hi @{user.username}\!\n\nPlease /grant access to your wishes to this chat\.\nYou can always /revoke the access if you want\.\n[Click here](https://t.me/wishmatch_bot/wishes?startapp={chat.id}) or use the button below to open wishmatch app\.",
+        text=f"Hi @{user.username}\!\n\nPlease /grant access to your wishes to this chat\.\nYou can always /revoke the access if you want\.\n\n[Click here](https://t.me/wishmatch_bot/wishes?startapp={chat.id}) or use the button below to open wishmatch app\.",
         chat_id=chat.id,
         parse_mode=ParseMode.MARKDOWN_V2,
         # reply_markup=reply_markup,
