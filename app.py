@@ -40,7 +40,7 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
         menu_button=MenuButtonWebApp(
             text="Open",
             web_app=WebAppInfo(
-                url=f"https://havka.one?tgWebAppStartParam={chat.id}"
+                url=f"https://t.me/wishmatch_bot/wishes?startapp={chat.id}"
             )
         )
     )
