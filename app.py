@@ -121,6 +121,15 @@ async def grant_access(update: Update, context: ContextTypes.DEFAULT_TYPE) -> No
             ) 
             values (
                 {user.id}, 
+                {user.id}
+            );
+            
+            insert into permissions (
+                tg_user_id, 
+                tg_chat_id
+            ) 
+            values (
+                {user.id}, 
                 {chat.id}
             );""")
             conn.commit()
