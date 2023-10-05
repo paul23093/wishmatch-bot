@@ -36,20 +36,20 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
         )
     )
 
-    reply_markup = InlineKeyboardMarkup.from_button(
-        button=InlineKeyboardButton(
-            text="Open wishmatch",
-            web_app=WebAppInfo(
-                url=f"https://{os.environ.get('PG_HOST')}?chat_id={chat.id}"
-            )
-        )
-    )
+    # reply_markup = InlineKeyboardMarkup.from_button(
+    #     button=InlineKeyboardButton(
+    #         text="Open wishmatch",
+    #         web_app=WebAppInfo(
+    #             url=f"https://{os.environ.get('PG_HOST')}?chat_id={chat.id}"
+    #         )
+    #     )
+    # )
 
     await context.bot.send_message(
-        text=f"Hi @{user.username}\!\n\nPlease /grant access to your wishes to this chat\.\nYou can always /revoke the access if you want\.",
+        text=f"Hi @{user.username}\!\n\nPlease /grant access to your wishes to this chat\.\nYou can always /revoke the access if you want\.\n[Open wishmatch](https://t.me/wishmatch_bot/wishes?startapp={chat.id})",
         chat_id=chat.id,
         parse_mode=ParseMode.MARKDOWN_V2,
-        reply_markup=reply_markup,
+        # reply_markup=reply_markup,
     )
 
 
