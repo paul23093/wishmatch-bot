@@ -39,7 +39,7 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     reply_markup = InlineKeyboardMarkup.from_button(
         button=InlineKeyboardButton(
             text="Open wishmatch",
-            url="https://t.me/wishmatch_bot/wishes?startapp={chat.id}",
+            url=f"https://t.me/wishmatch_bot/wishes?startapp={chat.id}",
             # web_app=WebAppInfo(
             #     url=f"https://{os.environ.get('PG_HOST')}?chat_id={chat.id}"
             # )
