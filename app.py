@@ -31,7 +31,7 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
         menu_button=MenuButtonWebApp(
             text="Open",
             web_app=WebAppInfo(
-                url=f"https://havka.one?chat_id={chat.id}"
+                url=f"https://{os.environ.get('PG_HOST')}?chat_id={chat.id}"
             )
         )
     )
@@ -40,7 +40,7 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
         button=InlineKeyboardButton(
             text="Open wishmatch",
             web_app=WebAppInfo(
-                url=f"https://havka.one?chat_id={chat.id}"
+                url=f"https://{os.environ.get('PG_HOST')}?chat_id={chat.id}"
             )
         )
     )
