@@ -36,8 +36,8 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
         )
     )
 
-    reply_markup = ReplyKeyboardMarkup.from_button(
-        button=KeyboardButton(
+    reply_markup = InlineKeyboardMarkup.from_button(
+        button=InlineKeyboardButton(
             text="Open wishmatch",
             web_app=WebAppInfo(
                 url=f"https://havka.one?chat_id={chat.id}"
@@ -49,7 +49,7 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
         text=f"Hi @{user.username}\!\n\nPlease /grant access to your wishes to this chat\.\nYou can always /revoke the access if you want\.",
         chat_id=chat.id,
         parse_mode=ParseMode.MARKDOWN_V2,
-        reply_markup=ReplyKeyboardRemove(),
+        reply_markup=reply_markup,
     )
 
 
