@@ -2,7 +2,7 @@ import nest_asyncio
 import json
 import os
 import psycopg2
-from telegram import Update, InlineKeyboardMarkup, InlineKeyboardButton, WebAppInfo, ReplyKeyboardMarkup, KeyboardButton, MenuButtonWebApp
+from telegram import Update, InlineKeyboardMarkup, InlineKeyboardButton, WebAppInfo, ReplyKeyboardMarkup, ReplyKeyboardRemove, KeyboardButton, MenuButtonWebApp
 from telegram.ext import ApplicationBuilder, CommandHandler, ContextTypes, CallbackQueryHandler, ConversationHandler, MessageHandler, filters
 from telegram.constants import ParseMode
 from dotenv import load_dotenv
@@ -49,7 +49,7 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
         text=f"Hi @{user.username}\!\n\nPlease /grant access to your wishes to this chat\.\nYou can always /revoke the access if you want\.",
         chat_id=chat.id,
         parse_mode=ParseMode.MARKDOWN_V2,
-        reply_markup=reply_markup,
+        reply_markup=ReplyKeyboardRemove(),
     )
 
 
