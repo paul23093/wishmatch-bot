@@ -81,6 +81,15 @@ async def grant_access(update: Update, context: ContextTypes.DEFAULT_TYPE) -> No
                 {f"'{user.first_name}'" if user.first_name else "NULL"},
                 {f"'{user.last_name}'" if user.last_name else "NULL"}
             );
+            
+            insert into chats (
+                tg_chat_id, 
+                tg_chat_name
+            ) 
+            values (
+                {chat.id}, 
+                {chat.title}
+            );
             """)
             conn.commit()
 
