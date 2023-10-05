@@ -2,7 +2,7 @@ import nest_asyncio
 import json
 import os
 import psycopg2
-from telegram import Update, InlineKeyboardMarkup, InlineKeyboardButton, WebAppInfo, ReplyKeyboardMarkup, KeyboardButton
+from telegram import Update, InlineKeyboardMarkup, InlineKeyboardButton, WebAppInfo, ReplyKeyboardMarkup, KeyboardButton, MenuButtonWebApp
 from telegram.ext import ApplicationBuilder, CommandHandler, ContextTypes, CallbackQueryHandler, ConversationHandler, MessageHandler, filters
 from telegram.constants import ParseMode
 from dotenv import load_dotenv
@@ -34,6 +34,17 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
         ]
     ]
     )
+
+    await context.bot.set_chat_menu_button(
+        chat_id=user.id,
+        menu_button=MenuButtonWebApp(
+            text="Open",
+            web_app=WebAppInfo(
+                url=f"https://havka.one?tgWebAppStartParam={chat.id}"
+            )
+        )
+    )
+
     await context.bot.send_message(
         text=f"Hi {user.username}\n\nLaunch [WishMatch](https://t.me/wishmatch_bot/wishes?startapp={chat.id})",
         chat_id=chat.id,
