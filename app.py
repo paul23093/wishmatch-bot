@@ -81,7 +81,18 @@ async def grant_access(update: Update, context: ContextTypes.DEFAULT_TYPE) -> No
                 {f"'{user.first_name}'" if user.first_name else "NULL"},
                 {f"'{user.last_name}'" if user.last_name else "NULL"}
             );
-            
+            """)
+
+        cur.execute(f"""
+                select count(*)>0 as is_chat_exists
+                from chats
+                where tg_chat_id = {chat.id}
+                ;
+                """)
+
+        data_c = [dict((cur.description[i][0], value) for i, value in enumerate(row)) for row in cur.fetchall()][0]
+        if not data_c["is_chat_exists"]:
+            cur.execute(f"""
             insert into chats (
                 tg_chat_id, 
                 tg_chat_name
