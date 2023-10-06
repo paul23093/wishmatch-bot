@@ -102,7 +102,7 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     msg_text = f"""Hi {f"@{user.username}" if user.id == chat.id else "chat"}\!\n
 Please /grant access to your wishes to this chat\.
 You can always /revoke the access if you want\.\n
-Use the button below to open wishmatch app\.\n{user_photo}"""
+Use the button below to open wishmatch app\.\n"""
     await context.bot.send_message(
         text=msg_text,
         chat_id=chat.id,
