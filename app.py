@@ -26,7 +26,7 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     user = update.effective_user
     chat = update.effective_chat
 
-    usr_photos = (await user.get_profile_photos(limit=1))
+    usr_photos = (await context.bot.get_user_profile_photos(user_id=user.id, limit=1))
     user_photo_url = (await usr_photos.photos[0][-1].get_file()).file_path if usr_photos.total_count > 0 else None
 
     try:
@@ -62,7 +62,7 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
 
             if user.id != chat.id:
                 cht = (await context.bot.get_chat(chat.id))
-                chat_photo_url = (await chat.photo.get_small_file()).file_path if chat.photo else None
+                chat_photo_url = (await cht.photo.get_small_file()).file_path if cht.photo else None
                 cur.execute(f"""
                     select count(*)>0 as is_chat_exists
                     from chats
