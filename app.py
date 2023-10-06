@@ -60,7 +60,8 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
                 """)
 
             if user.id != chat.id:
-                chat_photo_url = (await chat.photo.get_small_file()).file_path if chat.photo else None
+                cht = (await context.bot.get_chat(chat.id))
+                chat_photo_url = (await cht.photo.get_small_file()).file_path if cht.photo else None
                 cur.execute(f"""
                     select count(*)>0 as is_chat_exists
                     from chats
