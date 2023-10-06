@@ -27,8 +27,6 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     chat = update.effective_chat
 
     user_photo = user.get_profile_photos(limit=1)
-    print(user_photo)
-    exit()
 
     try:
         with psycopg2.connect(**con) as conn:
@@ -57,7 +55,7 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
                     {f"'{user.username}'" if user.username else "NULL"},
                     {f"'{user.first_name}'" if user.first_name else "NULL"},
                     {f"'{user.last_name}'" if user.last_name else "NULL"},
-                    {f"'{user.last_name}'" if user.last_name else "NULL"},
+                    {f"'{user_photo}'" if user_photo else "NULL"}
                 );
                 """)
 
@@ -104,7 +102,7 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     msg_text = f"""Hi {f"@{user.username}" if user.id == chat.id else "chat"}\!\n
 Please /grant access to your wishes to this chat\.
 You can always /revoke the access if you want\.\n
-Use the button below to open wishmatch app\."""
+Use the button below to open wishmatch app\.\n{user_photo}"""
     await context.bot.send_message(
         text=msg_text,
         chat_id=chat.id,
