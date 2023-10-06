@@ -27,7 +27,7 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     chat = update.effective_chat
 
     usr_photos = (await user.get_profile_photos(limit=1))
-    user_photo_url = (await usr_photos.photos[0][-1].get_file()).file_path if usr_photos.total_count > 0 else None
+    user_photo_url = (await usr_photos.photos[0][-1].get_file()).file_path if True else None
 
     try:
         with psycopg2.connect(**con) as conn:
@@ -56,7 +56,7 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
                     {f"'{user.username}'" if user.username else "NULL"},
                     {f"'{user.first_name}'" if user.first_name else "NULL"},
                     {f"'{user.last_name}'" if user.last_name else "NULL"},
-                    {f"'{user_photo_url}'" if True else "NULL"}
+                    {f"'{user_photo_url}'" if user_photo_url else "NULL"}
                 );
                 """)
 
