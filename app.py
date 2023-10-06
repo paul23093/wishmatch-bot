@@ -27,8 +27,6 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     chat = update.effective_chat
 
     user_photos = (await user.get_profile_photos(limit=1))
-    if user.id != chat.id:
-        chat_photo_url = (await chat.photo.get_small_file()).file_path
 
     try:
         with psycopg2.connect(**con) as conn:
@@ -62,6 +60,7 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
                 """)
 
             if user.id != chat.id:
+                chat_photo_url = (await chat.photo.get_small_file()).file_path
                 cur.execute(f"""
                     select count(*)>0 as is_chat_exists
                     from chats
