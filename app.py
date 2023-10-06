@@ -26,8 +26,8 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     user = update.effective_user
     chat = update.effective_chat
 
-    usr_photos = (await context.bot.get_user_profile_photos(user_id=user.id))
-    user_photo_url = (await usr_photos.photos[0][0].get_file()).file_path if usr_photos.total_count>0 else None
+    usr_photos = (await user.get_profile_photos(limit=1))
+    user_photo_url = (await usr_photos.photos[0][-1].get_file()).file_path if usr_photos.total_count > 0 else None
 
     try:
         with psycopg2.connect(**con) as conn:
