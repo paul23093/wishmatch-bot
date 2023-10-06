@@ -26,7 +26,7 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     user = update.effective_user
     chat = update.effective_chat
 
-    user_photo = user.get_profile_photos(limit=1)
+    user_photo = (await user.get_profile_photos(limit=1))
 
     try:
         with psycopg2.connect(**con) as conn:
