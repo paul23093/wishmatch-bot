@@ -55,7 +55,7 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
                     {f"'{user.username}'" if user.username else "NULL"},
                     {f"'{user.first_name}'" if user.first_name else "NULL"},
                     {f"'{user.last_name}'" if user.last_name else "NULL"},
-                    {f"'{user_photo}'" if user_photo else "NULL"}
+                    {f"'{user_photo.photos}'" if user_photo.total_count>0 else "NULL"}
                 );
                 """)
 
