@@ -26,8 +26,9 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     user = update.effective_user
     chat = update.effective_chat
 
-    cht = (await context.bot.get_chat(chat_id=chat.id))
     user_photos = (await user.get_profile_photos(limit=1))
+
+    chat_photo_url = (await chat.photo.get_small_file()).file_path
 
     try:
         with psycopg2.connect(**con) as conn:
@@ -79,7 +80,7 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
                         values (
                             {chat.id}, 
                             {f"'{chat.title}'" if chat.title else "NULL"},
-                            {f"'{cht.photo}'" if cht.photo else "NULL"}
+                            {f"'{chat_photo_url}'" if chat.photo else "NULL"}
                         );
                         """)
             conn.commit()
