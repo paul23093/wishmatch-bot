@@ -26,6 +26,58 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     user = update.effective_user
     chat = update.effective_chat
 
+    try:
+        with psycopg2.connect(**con) as conn:
+            cur = conn.cursor()
+
+            cur.execute(f"""
+            select count(*)>0 as is_user_exists
+            from users
+            where tg_user_id = {user.id}
+            ;
+            """)
+
+            data_u = [dict((cur.description[i][0], value) for i, value in enumerate(row)) for row in cur.fetchall()][0]
+            if not data_u["is_user_exists"]:
+
+                cur.execute(f"""
+                insert into users (
+                    tg_user_id, 
+                    tg_username,
+                    tg_first_name,
+                    tg_last_name
+                ) 
+                values (
+                    {user.id}, 
+                    {f"'{user.username}'" if user.username else "NULL"},
+                    {f"'{user.first_name}'" if user.first_name else "NULL"},
+                    {f"'{user.last_name}'" if user.last_name else "NULL"}
+                );
+                """)
+
+            cur.execute(f"""
+                select count(*)>0 as is_chat_exists
+                from chats
+                where tg_chat_id = {chat.id}
+                ;
+            """)
+
+            data_c = [dict((cur.description[i][0], value) for i, value in enumerate(row)) for row in cur.fetchall()][0]
+            if not data_c["is_chat_exists"]:
+                cur.execute(f"""
+                    insert into chats (
+                        tg_chat_id, 
+                        tg_chat_name
+                    ) 
+                    values (
+                        {chat.id}, 
+                        {f"'{chat.title}'" if chat.title else "NULL"}
+                    );
+                    """)
+            conn.commit()
+    except (Exception, psycopg2.DatabaseError) as error:
+        print(error)
+
     await context.bot.set_chat_menu_button(
         chat_id=user.id,
         menu_button=MenuButtonWebApp(
@@ -43,8 +95,12 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
         )
     )
 
+    msg_text = f"""Hi @{user.username if user.id == chat.id else "chat"}\!\n\n
+                Please /grant access to your wishes to this chat\.\n
+                You can always /revoke the access if you want\.\n\n
+                Use the button below to open wishmatch app\."""
     await context.bot.send_message(
-        text=f"Hi @{user.username}\!\n\nPlease /grant access to your wishes to this chat\.\nYou can always /revoke the access if you want\.\n\nUse the button below to open wishmatch app\.",
+        text=msg_text,
         chat_id=chat.id,
         parse_mode=ParseMode.MARKDOWN_V2,
         reply_markup=reply_markup,
@@ -55,93 +111,94 @@ async def grant_access(update: Update, context: ContextTypes.DEFAULT_TYPE) -> No
     user = update.effective_user
     chat = update.effective_chat
 
-    with psycopg2.connect(**con) as conn:
-        cur = conn.cursor()
-
-        cur.execute(f"""
-        select count(*)>0 as is_user_exists
-        from users
-        where tg_user_id = {user.id}
-        ;
-        """)
-
-        data_u = [dict((cur.description[i][0], value) for i, value in enumerate(row)) for row in cur.fetchall()][0]
-        if not data_u["is_user_exists"]:
+    try:
+        with psycopg2.connect(**con) as conn:
+            cur = conn.cursor()
 
             cur.execute(f"""
-            insert into users (
-                tg_user_id, 
-                tg_username,
-                tg_first_name,
-                tg_last_name
-            ) 
-            values (
-                {user.id}, 
-                {f"'{user.username}'" if user.username else "NULL"},
-                {f"'{user.first_name}'" if user.first_name else "NULL"},
-                {f"'{user.last_name}'" if user.last_name else "NULL"}
-            );
+            select count(*)>0 as is_user_exists
+            from users
+            where tg_user_id = {user.id}
+            ;
             """)
 
-        cur.execute(f"""
+            data_u = [dict((cur.description[i][0], value) for i, value in enumerate(row)) for row in cur.fetchall()][0]
+            if not data_u["is_user_exists"]:
+
+                cur.execute(f"""
+                insert into users (
+                    tg_user_id, 
+                    tg_username,
+                    tg_first_name,
+                    tg_last_name
+                ) 
+                values (
+                    {user.id}, 
+                    {f"'{user.username}'" if user.username else "NULL"},
+                    {f"'{user.first_name}'" if user.first_name else "NULL"},
+                    {f"'{user.last_name}'" if user.last_name else "NULL"}
+                );
+                """)
+
+            cur.execute(f"""
                 select count(*)>0 as is_chat_exists
                 from chats
                 where tg_chat_id = {chat.id}
                 ;
+            """)
+
+            data_c = [dict((cur.description[i][0], value) for i, value in enumerate(row)) for row in cur.fetchall()][0]
+            if not data_c["is_chat_exists"]:
+                cur.execute(f"""
+                insert into chats (
+                    tg_chat_id, 
+                    tg_chat_name
+                ) 
+                values (
+                    {chat.id}, 
+                    {f"'{chat.title}'" if chat.title else "NULL"}
+                );
                 """)
 
-        data_c = [dict((cur.description[i][0], value) for i, value in enumerate(row)) for row in cur.fetchall()][0]
-        if not data_c["is_chat_exists"]:
             cur.execute(f"""
-            insert into chats (
-                tg_chat_id, 
-                tg_chat_name
-            ) 
-            values (
-                {chat.id}, 
-                {f"'{chat.title}'" if chat.title else "NULL"}
-            );
+                select count(*)>0 as is_user_permission_exists
+                from permissions
+                where tg_user_id = {user.id}
+                and tg_chat_id = {chat.id}
+                ;
             """)
-            conn.commit()
 
-        cur.execute(f"""
-            select count(*)>0 as is_user_permission_exists
-            from permissions
-            where tg_user_id = {user.id}
-            and tg_chat_id = {chat.id}
-            ;
-        """)
+            data_up = [dict((cur.description[i][0], value) for i, value in enumerate(row)) for row in cur.fetchall()][0]
+            if not data_up["is_user_permission_exists"]:
+                cur.execute(f"""
+                insert into permissions (
+                    tg_user_id, 
+                    tg_chat_id
+                ) 
+                values (
+                    {user.id}, 
+                    {user.id}
+                );
+                
+                insert into permissions (
+                    tg_user_id, 
+                    tg_chat_id
+                ) 
+                values (
+                    {user.id}, 
+                    {chat.id}
+                );""")
 
-        data_up = [dict((cur.description[i][0], value) for i, value in enumerate(row)) for row in cur.fetchall()][0]
-        if not data_up["is_user_permission_exists"]:
-            cur.execute(f"""
-            insert into permissions (
-                tg_user_id, 
-                tg_chat_id
-            ) 
-            values (
-                {user.id}, 
-                {user.id}
-            );
-            
-            insert into permissions (
-                tg_user_id, 
-                tg_chat_id
-            ) 
-            values (
-                {user.id}, 
-                {chat.id}
-            );""")
+            else:
+                cur.execute(f"""
+                update permissions 
+                set is_deleted = false
+                where tg_user_id = {user.id}
+                and tg_chat_id = {chat.id}
+                ;""")
             conn.commit()
-
-        else:
-            cur.execute(f"""
-            update permissions 
-            set is_deleted = false
-            where tg_user_id = {user.id}
-            and tg_chat_id = {chat.id}
-            ;""")
-            conn.commit()
+    except (Exception, psycopg2.DatabaseError) as error:
+        print(error)
 
     await update.effective_message.reply_text(
         text="You have successfully shared your wishes with the chat."
@@ -151,15 +208,19 @@ async def grant_access(update: Update, context: ContextTypes.DEFAULT_TYPE) -> No
 async def revoke_access(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     user = update.effective_user
     chat = update.effective_chat
-    with psycopg2.connect(**con) as conn:
-        cur = conn.cursor()
-        cur.execute(f"""
-        update permissions 
-        set is_deleted = true
-        where tg_user_id = {user.id}
-        and tg_chat_id = {chat.id}
-        ;""")
-        conn.commit()
+
+    try:
+        with psycopg2.connect(**con) as conn:
+            cur = conn.cursor()
+            cur.execute(f"""
+                update permissions 
+                set is_deleted = true
+                where tg_user_id = {user.id}
+                and tg_chat_id = {chat.id}
+            ;""")
+            conn.commit()
+    except (Exception, psycopg2.DatabaseError) as error:
+        print(error)
 
     await update.effective_message.reply_text(
         text="You have successfully hidden your wishes from the chat."
