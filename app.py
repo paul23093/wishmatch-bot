@@ -60,7 +60,7 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
                 """)
 
             if user.id != chat.id:
-                chat_photo_url = (await chat.photo.get_small_file()).file_path
+                chat_photo_url = (await chat.photo.get_small_file()).file_path if chat.photo else None
                 cur.execute(f"""
                     select count(*)>0 as is_chat_exists
                     from chats
@@ -79,7 +79,7 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
                         values (
                             {chat.id}, 
                             {f"'{chat.title}'" if chat.title else "NULL"},
-                            {f"'{chat_photo_url}'" if chat.photo else "NULL"}
+                            {f"'{chat_photo_url}'" if chat_photo_url else "NULL"}
                         );
                         """)
             conn.commit()
