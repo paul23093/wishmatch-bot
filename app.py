@@ -25,8 +25,7 @@ con = {
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     user = update.effective_user
     chat = update.effective_chat
-
-    user_photo = (await user.get_profile_photos(limit=1))
+    user_photos = (await user.get_profile_photos(limit=1))
 
     try:
         with psycopg2.connect(**con) as conn:
@@ -55,29 +54,32 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
                     {f"'{user.username}'" if user.username else "NULL"},
                     {f"'{user.first_name}'" if user.first_name else "NULL"},
                     {f"'{user.last_name}'" if user.last_name else "NULL"},
-                    {f"'{user_photo.photos}'" if user_photo.total_count>0 else "NULL"}
+                    {f"'{user_photos.photos}'" if user_photos.total_count>0 else "NULL"}
                 );
                 """)
 
-            cur.execute(f"""
-                select count(*)>0 as is_chat_exists
-                from chats
-                where tg_chat_id = {chat.id}
-                ;
-            """)
-
-            data_c = [dict((cur.description[i][0], value) for i, value in enumerate(row)) for row in cur.fetchall()][0]
-            if not data_c["is_chat_exists"]:
+            if user.id != chat.id:
                 cur.execute(f"""
-                    insert into chats (
-                        tg_chat_id, 
-                        tg_chat_name
-                    ) 
-                    values (
-                        {chat.id}, 
-                        {f"'{chat.title}'" if chat.title else "NULL"}
-                    );
-                    """)
+                    select count(*)>0 as is_chat_exists
+                    from chats
+                    where tg_chat_id = {chat.id}
+                    ;
+                """)
+
+                data_c = [dict((cur.description[i][0], value) for i, value in enumerate(row)) for row in cur.fetchall()][0]
+                if not data_c["is_chat_exists"]:
+                    cur.execute(f"""
+                        insert into chats (
+                            tg_chat_id, 
+                            tg_chat_name,
+                            tg_chat_photo_url
+                        ) 
+                        values (
+                            {chat.id}, 
+                            {f"'{chat.title}'" if chat.title else "NULL"},
+                            {f"'{chat.photo}'" if chat.photo else "NULL"}
+                        );
+                        """)
             conn.commit()
     except (Exception, psycopg2.DatabaseError) as error:
         print(error)
