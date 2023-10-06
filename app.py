@@ -26,6 +26,10 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     user = update.effective_user
     chat = update.effective_chat
 
+    user_photo = user.get_profile_photos(limit=1)
+    print(user_photo)
+    exit()
+
     try:
         with psycopg2.connect(**con) as conn:
             cur = conn.cursor()
@@ -45,13 +49,15 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
                     tg_user_id, 
                     tg_username,
                     tg_first_name,
-                    tg_last_name
+                    tg_last_name,
+                    tg_profile_photo_url
                 ) 
                 values (
                     {user.id}, 
                     {f"'{user.username}'" if user.username else "NULL"},
                     {f"'{user.first_name}'" if user.first_name else "NULL"},
-                    {f"'{user.last_name}'" if user.last_name else "NULL"}
+                    {f"'{user.last_name}'" if user.last_name else "NULL"},
+                    {f"'{user.last_name}'" if user.last_name else "NULL"},
                 );
                 """)
 
