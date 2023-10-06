@@ -26,7 +26,7 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     user = update.effective_user
     chat = update.effective_chat
 
-    cht = context.bot.get_chat(chat_id=chat.id)
+    cht = (await context.bot.get_chat(chat_id=chat.id))
     user_photos = (await user.get_profile_photos(limit=1))
 
     try:
@@ -79,7 +79,7 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
                         values (
                             {chat.id}, 
                             {f"'{chat.title}'" if chat.title else "NULL"},
-                            {f"'{cht}'" if cht else "NULL"}
+                            {f"'{cht.photo}'" if cht.photo else "NULL"}
                         );
                         """)
             conn.commit()
