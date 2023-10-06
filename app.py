@@ -28,7 +28,7 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
 
     usr_photos = (await user.get_profile_photos(limit=1))
     # user_photo_url = (await usr_photos.photos[0][-1].get_file()).file_path if usr_photos.total_count > 0 else None
-    user_photo = (await usr_photos.photos[0][-1].get_file()) if usr_photos.total_count > 0 else None
+    user_photo = (await usr_photos.photos[0][0].get_file()) if usr_photos.total_count > 0 else None
     user_photo_bytearray = (await user_photo.download_as_bytearray()) if user_photo else None
 
     try:
