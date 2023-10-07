@@ -86,13 +86,11 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
                 cur.execute(f"""
                     insert into chats (
                         tg_chat_id, 
-                        tg_chat_name,
-                        tg_chat_photo
+                        tg_chat_name
                     ) 
                     values (
                         {chat.id}, 
-                        {f"'{chat.title}'" if chat.title else "NULL"},
-                        {f"'{chat_photo_base64}'" if chat_photo else "NULL"}
+                        {f"'{chat.title}'" if chat.title else "NULL"}
                     );
                     """)
             conn.commit()
