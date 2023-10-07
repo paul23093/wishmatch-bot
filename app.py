@@ -132,14 +132,6 @@ async def grant_access(update: Update, context: ContextTypes.DEFAULT_TYPE) -> No
     user = update.effective_user
     chat = update.effective_chat
 
-    user_photos = (await user.get_profile_photos(limit=1))
-    user_photo_base64 = "NULL"
-    if user_photos.total_count > 0:
-        user_photo = (await user_photos.photos[0][0].get_file())
-        user_photo_bytearray = (await user_photo.download_as_bytearray())
-        user_photo_base64_encoded_str = base64.b64encode(user_photo_bytearray)
-        user_photo_base64 = user_photo_base64_encoded_str.decode()
-
     try:
         with psycopg2.connect(**con) as conn:
             cur = conn.cursor()
@@ -153,6 +145,14 @@ async def grant_access(update: Update, context: ContextTypes.DEFAULT_TYPE) -> No
 
             data_u = [dict((cur.description[i][0], value) for i, value in enumerate(row)) for row in cur.fetchall()][0]
             if not data_u["is_user_exists"]:
+
+                user_photos = (await user.get_profile_photos(limit=1))
+                user_photo_base64 = "NULL"
+                if user_photos.total_count > 0:
+                    user_photo = (await user_photos.photos[0][0].get_file())
+                    user_photo_bytearray = (await user_photo.download_as_bytearray())
+                    user_photo_base64_encoded_str = base64.b64encode(user_photo_bytearray)
+                    user_photo_base64 = user_photo_base64_encoded_str.decode()
 
                 cur.execute(f"""
                 insert into users (
