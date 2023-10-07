@@ -80,7 +80,7 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
                     chat_photo = (await context.bot.get_chat(chat.id)).photo
                     chat_photo_base64 = "NULL"
                     if chat_photo:
-                        chat_photo_small = (await chat_photo.get_small_file()) if chat_photo else None
+                        chat_photo_small = (await chat_photo.get_small_file())
                         chat_photo_bytearray = (await chat_photo_small.download_as_bytearray())
                         chat_photo_base64_encoded_str = base64.b64encode(chat_photo_bytearray)
                         chat_photo_base64 = chat_photo_base64_encoded_str.decode()
@@ -162,26 +162,26 @@ async def grant_access(update: Update, context: ContextTypes.DEFAULT_TYPE) -> No
                     {f"'{user.last_name}'" if user.last_name else "NULL"}
                 );
                 """)
-
-            cur.execute(f"""
-                select count(*)>0 as is_chat_exists
-                from chats
-                where tg_chat_id = {chat.id}
-                ;
-            """)
-
-            data_c = [dict((cur.description[i][0], value) for i, value in enumerate(row)) for row in cur.fetchall()][0]
-            if not data_c["is_chat_exists"]:
+            if user.id != chat.id:
                 cur.execute(f"""
-                insert into chats (
-                    tg_chat_id, 
-                    tg_chat_name
-                ) 
-                values (
-                    {chat.id}, 
-                    {f"'{chat.title}'" if chat.title else "NULL"}
-                );
+                    select count(*)>0 as is_chat_exists
+                    from chats
+                    where tg_chat_id = {chat.id}
+                    ;
                 """)
+
+                data_c = [dict((cur.description[i][0], value) for i, value in enumerate(row)) for row in cur.fetchall()][0]
+                if not data_c["is_chat_exists"]:
+                    cur.execute(f"""
+                    insert into chats (
+                        tg_chat_id, 
+                        tg_chat_name
+                    ) 
+                    values (
+                        {chat.id}, 
+                        {f"'{chat.title}'" if chat.title else "NULL"}
+                    );
+                    """)
 
             cur.execute(f"""
                 select count(*)>0 as is_user_permission_exists
