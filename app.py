@@ -33,8 +33,8 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     if user_photos.total_count > 0:
         user_photo = (await user_photos.photos[0][0].get_file())
         user_photo_bytearray = (await user_photo.download_as_bytearray())
-        base64_encoded_str = base64.b64encode(user_photo_bytearray)
-        user_photo_base64 = base64_encoded_str.decode()
+        user_photo_base64_encoded_str = base64.b64encode(user_photo_bytearray)
+        user_photo_base64 = user_photo_base64_encoded_str.decode()
 
     try:
         with psycopg2.connect(**con) as conn:
@@ -56,7 +56,7 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
                     tg_username,
                     tg_first_name,
                     tg_last_name,
-                    tg_profile_photo_base64
+                    tg_profile_photo
                 ) 
                 values (
                     {user.id}, 
@@ -68,8 +68,6 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
                 """)
 
             if user.id != chat.id:
-                cht = (await context.bot.get_chat(chat.id))
-                chat_photo_url = (await cht.photo.get_small_file()).file_path if cht.photo else None
                 cur.execute(f"""
                     select count(*)>0 as is_chat_exists
                     from chats
@@ -79,16 +77,24 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
 
                 data_c = [dict((cur.description[i][0], value) for i, value in enumerate(row)) for row in cur.fetchall()][0]
                 if not data_c["is_chat_exists"]:
+                    chat_photo = (await context.bot.get_chat(chat.id)).photo
+                    chat_photo_base64 = "NULL"
+                    if chat_photo:
+                        chat_photo_small = (await chat_photo.get_small_file()) if chat_photo else None
+                        chat_photo_bytearray = (await chat_photo_small.download_as_bytearray())
+                        chat_photo_base64_encoded_str = base64.b64encode(chat_photo_bytearray)
+                        chat_photo_base64 = chat_photo_base64_encoded_str.decode()
+
                     cur.execute(f"""
                         insert into chats (
                             tg_chat_id, 
                             tg_chat_name,
-                            tg_chat_photo_url
+                            tg_chat_photo
                         ) 
                         values (
                             {chat.id}, 
                             {f"'{chat.title}'" if chat.title else "NULL"},
-                            {f"'{chat_photo_url}'" if chat_photo_url else "NULL"}
+                            {f"'{chat_photo_base64}'" if chat_photo else "NULL"}
                         );
                         """)
             conn.commit()
