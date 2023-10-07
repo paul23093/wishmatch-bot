@@ -28,7 +28,6 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     chat = update.effective_chat
 
     user_photos = (await user.get_profile_photos(limit=1))
-
     user_photo_base64 = "NULL"
     if user_photos.total_count > 0:
         user_photo = (await user_photos.photos[0][0].get_file())
@@ -67,36 +66,35 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
                 );
                 """)
 
-            if user.id != chat.id:
+            cur.execute(f"""
+                select count(*)>0 as is_chat_exists
+                from chats
+                where tg_chat_id = {chat.id}
+                ;
+            """)
+
+            data_c = [dict((cur.description[i][0], value) for i, value in enumerate(row)) for row in cur.fetchall()][0]
+            if not data_c["is_chat_exists"]:
+                chat_photo = (await context.bot.get_chat(chat.id)).photo
+                chat_photo_base64 = "NULL"
+                if chat_photo:
+                    chat_photo_small = (await chat_photo.get_small_file())
+                    chat_photo_bytearray = (await chat_photo_small.download_as_bytearray())
+                    chat_photo_base64_encoded_str = base64.b64encode(chat_photo_bytearray)
+                    chat_photo_base64 = chat_photo_base64_encoded_str.decode()
+
                 cur.execute(f"""
-                    select count(*)>0 as is_chat_exists
-                    from chats
-                    where tg_chat_id = {chat.id}
-                    ;
-                """)
-
-                data_c = [dict((cur.description[i][0], value) for i, value in enumerate(row)) for row in cur.fetchall()][0]
-                if not data_c["is_chat_exists"]:
-                    chat_photo = (await context.bot.get_chat(chat.id)).photo
-                    chat_photo_base64 = "NULL"
-                    if chat_photo:
-                        chat_photo_small = (await chat_photo.get_small_file())
-                        chat_photo_bytearray = (await chat_photo_small.download_as_bytearray())
-                        chat_photo_base64_encoded_str = base64.b64encode(chat_photo_bytearray)
-                        chat_photo_base64 = chat_photo_base64_encoded_str.decode()
-
-                    cur.execute(f"""
-                        insert into chats (
-                            tg_chat_id, 
-                            tg_chat_name,
-                            tg_chat_photo
-                        ) 
-                        values (
-                            {chat.id}, 
-                            {f"'{chat.title}'" if chat.title else "NULL"},
-                            {f"'{chat_photo_base64}'" if chat_photo else "NULL"}
-                        );
-                        """)
+                    insert into chats (
+                        tg_chat_id, 
+                        tg_chat_name,
+                        tg_chat_photo
+                    ) 
+                    values (
+                        {chat.id}, 
+                        {f"'{chat.title}'" if chat.title else "NULL"},
+                        {f"'{chat_photo_base64}'" if chat_photo else "NULL"}
+                    );
+                    """)
             conn.commit()
     except (Exception, psycopg2.DatabaseError) as error:
         print(error)
@@ -134,6 +132,14 @@ async def grant_access(update: Update, context: ContextTypes.DEFAULT_TYPE) -> No
     user = update.effective_user
     chat = update.effective_chat
 
+    user_photos = (await user.get_profile_photos(limit=1))
+    user_photo_base64 = "NULL"
+    if user_photos.total_count > 0:
+        user_photo = (await user_photos.photos[0][0].get_file())
+        user_photo_bytearray = (await user_photo.download_as_bytearray())
+        user_photo_base64_encoded_str = base64.b64encode(user_photo_bytearray)
+        user_photo_base64 = user_photo_base64_encoded_str.decode()
+
     try:
         with psycopg2.connect(**con) as conn:
             cur = conn.cursor()
@@ -153,35 +159,48 @@ async def grant_access(update: Update, context: ContextTypes.DEFAULT_TYPE) -> No
                     tg_user_id, 
                     tg_username,
                     tg_first_name,
-                    tg_last_name
+                    tg_last_name,
+                    tg_profile_photo
                 ) 
                 values (
                     {user.id}, 
                     {f"'{user.username}'" if user.username else "NULL"},
                     {f"'{user.first_name}'" if user.first_name else "NULL"},
-                    {f"'{user.last_name}'" if user.last_name else "NULL"}
+                    {f"'{user.last_name}'" if user.last_name else "NULL"},
+                    {f"'{user_photo_base64}'" if user_photos.total_count > 0 else "NULL"}
                 );
                 """)
-            if user.id != chat.id:
-                cur.execute(f"""
-                    select count(*)>0 as is_chat_exists
-                    from chats
-                    where tg_chat_id = {chat.id}
-                    ;
-                """)
 
-                data_c = [dict((cur.description[i][0], value) for i, value in enumerate(row)) for row in cur.fetchall()][0]
-                if not data_c["is_chat_exists"]:
-                    cur.execute(f"""
-                    insert into chats (
-                        tg_chat_id, 
-                        tg_chat_name
-                    ) 
-                    values (
-                        {chat.id}, 
-                        {f"'{chat.title}'" if chat.title else "NULL"}
-                    );
-                    """)
+            cur.execute(f"""
+                select count(*)>0 as is_chat_exists
+                from chats
+                where tg_chat_id = {chat.id}
+                ;
+            """)
+
+            data_c = [dict((cur.description[i][0], value) for i, value in enumerate(row)) for row in cur.fetchall()][0]
+            if not data_c["is_chat_exists"]:
+
+                chat_photo = (await context.bot.get_chat(chat.id)).photo
+                chat_photo_base64 = "NULL"
+                if chat_photo:
+                    chat_photo_small = (await chat_photo.get_small_file())
+                    chat_photo_bytearray = (await chat_photo_small.download_as_bytearray())
+                    chat_photo_base64_encoded_str = base64.b64encode(chat_photo_bytearray)
+                    chat_photo_base64 = chat_photo_base64_encoded_str.decode()
+
+                cur.execute(f"""
+                insert into chats (
+                    tg_chat_id, 
+                    tg_chat_name,
+                    tg_chat_photo
+                ) 
+                values (
+                    {chat.id}, 
+                    {f"'{chat.title}'" if chat.title else "NULL"},
+                    {f"'{chat_photo_base64}'" if chat_photo else "NULL"}
+                );
+                """)
 
             cur.execute(f"""
                 select count(*)>0 as is_user_permission_exists
