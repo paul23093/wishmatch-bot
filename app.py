@@ -56,7 +56,7 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
                     tg_username,
                     tg_first_name,
                     tg_last_name,
-                    tg_profile_photo_url
+                    tg_profile_photo_base64
                 ) 
                 values (
                     {user.id}, 
