@@ -1,5 +1,6 @@
 import nest_asyncio
 import json
+import base64
 import os
 import psycopg2
 from telegram import Update, InlineKeyboardMarkup, InlineKeyboardButton, WebAppInfo, ReplyKeyboardMarkup, ReplyKeyboardRemove, KeyboardButton, MenuButtonWebApp
@@ -27,7 +28,13 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     chat = update.effective_chat
 
     user_photos = (await user.get_profile_photos(limit=1))
-    user_photo_url = (await user_photos.photos[0][-1].get_file()).file_path if user_photos.total_count > 0 else None
+
+    user_photo_base64 = "NULL"
+    if user_photos.total_count > 0:
+        user_photo = (await user_photos.photos[0][-1].get_file())
+        user_photo_bytearray = (await user_photo.download_as_bytearray())
+        base64_encoded_str = base64.b64encode(user_photo_bytearray)
+        user_photo_base64 = base64_encoded_str.decode()
 
     try:
         with psycopg2.connect(**con) as conn:
@@ -56,7 +63,7 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
                     {f"'{user.username}'" if user.username else "NULL"},
                     {f"'{user.first_name}'" if user.first_name else "NULL"},
                     {f"'{user.last_name}'" if user.last_name else "NULL"},
-                    {f"'{user_photo_url}'" if user_photo_url else "NULL"}
+                    {f"'{user_photo_base64}'" if user_photos.total_count > 0 else "NULL"}
                 );
                 """)
 
