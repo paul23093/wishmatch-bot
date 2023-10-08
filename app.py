@@ -300,8 +300,7 @@ async def update_info(update: Update, context: ContextTypes.DEFAULT_TYPE) -> Non
             cur = conn.cursor()
             cur.execute(f"""
                 select count(*)>0 as is_permission_exists
-                from chats c
-                join permissions p on c.tg_chat_id = p.tg_chat_id
+                from permissions p
                 where c.tg_chat_id = {chat.id}
                 and c.tg_user_id = {user.id}
                 ;
