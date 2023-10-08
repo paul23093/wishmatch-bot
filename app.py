@@ -354,15 +354,15 @@ You can always /revoke the access if you want\.\n"""
                     ;
                     """)
                 conn.commit()
+
+                msg_text = f"""{f"{user.first_name}" if user.first_name else f"@{user.username}"}\, you have successfully updated your information\."""
+                await context.bot.send_message(
+                    text=msg_text,
+                    chat_id=chat.id,
+                    parse_mode=ParseMode.MARKDOWN_V2
+                )
     except (Exception, psycopg2.DatabaseError) as error:
         print(error)
-
-    msg_text = f"""{f"{user.first_name}" if user.first_name else f"@{user.username}"}\, you have successfully updated your information\."""
-    await context.bot.send_message(
-        text=msg_text,
-        chat_id=chat.id,
-        parse_mode=ParseMode.MARKDOWN_V2
-    )
 
 
 def main() -> None:
