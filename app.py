@@ -354,7 +354,10 @@ Please note you can always /revoke the access if you want\.\n"""
                     """)
                 conn.commit()
 
-                msg_text = f"""{f"{user.first_name}" if user.first_name else f"@{user.username}"}\, you have successfully updated your information\."""
+                if user.id == chat.id:
+                    msg_text = f"""{f"{user.first_name}" if user.first_name else f"@{user.username}"}\, you have successfully updated your information\."""
+                else:
+                    msg_text = f"""{f"{user.first_name}" if user.first_name else f"@{user.username}"}\ has successfully updated information of this chat\."""
                 await context.bot.send_message(
                     text=msg_text,
                     chat_id=chat.id,
