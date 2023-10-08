@@ -310,8 +310,8 @@ async def update_info(update: Update, context: ContextTypes.DEFAULT_TYPE) -> Non
             if not data_u["is_permission_exists"]:
 
                 msg_text = f"""{f"{user.first_name}" if user.first_name else f"@{user.username}"}\,you did not /grant access to your information yet so we have nothing to update for now\.\n\n
-                Please /grant access to your wishes to this chat\.
-                You can always /revoke the access if you want\.\n"""
+Please /grant access to your wishes to this chat\.
+You can always /revoke the access if you want\.\n"""
                 await context.bot.send_message(
                     text=msg_text,
                     chat_id=chat.id,
