@@ -95,6 +95,37 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
                         {f"'{chat_photo_base64}'" if chat_photo else "NULL"}
                     );
                     """)
+
+            if user.id == chat.id:
+                cur.execute(f"""
+                    select count(*)>0 as is_user_permission_exists
+                    from permissions
+                    where tg_user_id = {user.id}
+                    and tg_chat_id = {chat.id}
+                    ;
+                """)
+
+                data_up = [dict((cur.description[i][0], value) for i, value in enumerate(row)) for row in cur.fetchall()][0]
+                if not data_up["is_user_permission_exists"]:
+                    cur.execute(f"""
+                        insert into permissions (
+                            tg_user_id, 
+                            tg_chat_id
+                        ) 
+                        values (
+                            {user.id}, 
+                            {chat.id}
+                        );
+                    """)
+
+                else:
+                    cur.execute(f"""
+                        update permissions 
+                        set is_deleted = false
+                        where tg_user_id = {user.id}
+                        and tg_chat_id = {chat.id}
+                        ;
+                    """)
             conn.commit()
     except (Exception, psycopg2.DatabaseError) as error:
         print(error)
@@ -219,24 +250,15 @@ async def grant_access(update: Update, context: ContextTypes.DEFAULT_TYPE) -> No
                 ) 
                 values (
                     {user.id}, 
-                    {user.id}
-                );
-                
-                insert into permissions (
-                    tg_user_id, 
-                    tg_chat_id
-                ) 
-                values (
-                    {user.id}, 
                     {chat.id}
                 );""")
 
             else:
                 cur.execute(f"""
-                update permissions 
-                set is_deleted = false
-                where tg_user_id = {user.id}
-                and tg_chat_id = {chat.id}
+                    update permissions 
+                    set is_deleted = false
+                    where tg_user_id = {user.id}
+                    and tg_chat_id = {chat.id}
                 ;""")
             conn.commit()
     except (Exception, psycopg2.DatabaseError) as error:
