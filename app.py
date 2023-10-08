@@ -291,12 +291,88 @@ async def revoke_access(update: Update, context: ContextTypes.DEFAULT_TYPE) -> N
     )
 
 
+async def update_info(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+    user = update.effective_user
+    chat = update.effective_chat
+
+    try:
+        with psycopg2.connect(**con) as conn:
+            cur = conn.cursor()
+            cur.execute(f"""
+                select count(*)>0 as is_permission_exists
+                from chats c
+                join permissions p on c.tg_chat_id = p.tg_chat_id
+                where c.tg_chat_id = {chat.id}
+                and c.tg_user_id = {user.id}
+                ;
+            """)
+
+            data_u = [dict((cur.description[i][0], value) for i, value in enumerate(row)) for row in cur.fetchall()][0]
+            if not data_u["is_permission_exists"]:
+
+                msg_text = f"""{f"{user.first_name}" if user.first_name else f"@{user.username}"}\,you did not /grant access to your information yet so we have nothing to update for now\.\n\n
+                Please /grant access to your wishes to this chat\.
+                You can always /revoke the access if you want\.\n"""
+                await context.bot.send_message(
+                    text=msg_text,
+                    chat_id=chat.id,
+                    parse_mode=ParseMode.MARKDOWN_V2
+                )
+            else:
+                if user.id == chat.id:
+                    user_photos = (await user.get_profile_photos(limit=1))
+                    user_photo_base64 = "NULL"
+                    if user_photos.total_count > 0:
+                        user_photo = (await user_photos.photos[0][0].get_file())
+                        user_photo_bytearray = (await user_photo.download_as_bytearray())
+                        user_photo_base64_encoded_str = base64.b64encode(user_photo_bytearray)
+                        user_photo_base64 = user_photo_base64_encoded_str.decode()
+
+                    cur.execute(f"""
+                    update users 
+                    set tg_username = {f"'{user.username}'" if user.username else "NULL"},
+                        tg_first_name = {f"'{user.first_name}'" if user.first_name else "NULL"},
+                        tg_last_name = {f"'{user.last_name}'" if user.last_name else "NULL"},
+                        tg_profile_photo = {f"'{user_photo_base64}'" if user_photos.total_count > 0 else "NULL"}
+                    where tg_user_id = {user.id}
+                    ;
+                    """)
+                else:
+
+                    chat_photo = (await context.bot.get_chat(chat.id)).photo
+                    chat_photo_base64 = "NULL"
+                    if chat_photo:
+                        chat_photo_small = (await chat_photo.get_small_file())
+                        chat_photo_bytearray = (await chat_photo_small.download_as_bytearray())
+                        chat_photo_base64_encoded_str = base64.b64encode(chat_photo_bytearray)
+                        chat_photo_base64 = chat_photo_base64_encoded_str.decode()
+
+                    cur.execute(f"""
+                    update chats
+                    set tg_chat_name = {f"'{chat.title}'" if chat.title else "NULL"},
+                        tg_chat_photo = {f"'{chat_photo_base64}'" if chat_photo else "NULL"}
+                    where tg_chat_id = {chat.id}
+                    ;
+                    """)
+                conn.commit()
+    except (Exception, psycopg2.DatabaseError) as error:
+        print(error)
+
+    msg_text = f"""{f"{user.first_name}" if user.first_name else f"@{user.username}"}\, you have successfully updated your information\."""
+    await context.bot.send_message(
+        text=msg_text,
+        chat_id=chat.id,
+        parse_mode=ParseMode.MARKDOWN_V2
+    )
+
+
 def main() -> None:
     application = ApplicationBuilder().token(token).build()
 
     application.add_handler(CommandHandler("start", start))
     application.add_handler(CommandHandler("grant", grant_access))
     application.add_handler(CommandHandler("revoke", revoke_access))
+    application.add_handler(CommandHandler("update_info", update_info))
 
     application.run_polling(allowed_updates=Update.ALL_TYPES)
 
