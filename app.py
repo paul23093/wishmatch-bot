@@ -301,8 +301,8 @@ async def update_info(update: Update, context: ContextTypes.DEFAULT_TYPE) -> Non
             cur.execute(f"""
                 select count(*)>0 as is_permission_exists
                 from permissions p
-                where c.tg_chat_id = {chat.id}
-                and c.tg_user_id = {user.id}
+                where p.tg_chat_id = {chat.id}
+                and p.tg_user_id = {user.id}
                 ;
             """)
 
