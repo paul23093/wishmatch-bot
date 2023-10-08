@@ -152,11 +152,16 @@ Please /grant access to your wishes to this chat\.
 You can always /revoke the access if you want\.\n
 Use the button below to open wishmatch app\.\n
 For better interaction it is recommended to pin this message\. In this way you are getting instant access to the app via button right from the pinned message\."""
-    await context.bot.send_message(
+    msg = await context.bot.send_message(
         text=msg_text,
         chat_id=chat.id,
         parse_mode=ParseMode.MARKDOWN_V2,
         reply_markup=reply_markup,
+    )
+
+    await context.bot.pin_chat_message(
+        chat_id=chat.id,
+        message_id=msg.id
     )
 
 
