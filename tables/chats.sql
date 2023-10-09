@@ -6,4 +6,4 @@ create table chats (
 	created_at timestamp default current_timestamp,
 	updated_at timestamp default current_timestamp,
 	constraint pk_chat unique(tg_chat_id)
-)
+);
