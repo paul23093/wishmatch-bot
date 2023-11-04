@@ -376,7 +376,7 @@ def main() -> None:
     application.add_handler(CommandHandler("revoke", revoke_access))
     application.add_handler(CommandHandler("update_info", update_info))
 
-    application.run_polling()
+    application.run_polling(allowed_updates=Update.ALL_TYPES)
 
 
 if __name__ == "__main__":
