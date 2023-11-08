@@ -140,16 +140,12 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
         )
     )
 
-    reply_markup = InlineKeyboardMarkup([
-        [InlineKeyboardButton(
+    reply_markup = InlineKeyboardMarkup.from_button(
+        button=InlineKeyboardButton(
             text="Open wishmatch",
             url=f"https://t.me/wishmatch_bot/wishes?startapp={chat.id}",
-        )],
-        [InlineKeyboardButton(
-            text='Grant access',
-            callback_data='grant_access_inline'
-        )]
-    ])
+        )
+    )
 
     msg_text = f"""Hi {f"@{user.username}" if user.id == chat.id else "chat"}\!\n
 Please /grant access to your wishes to this chat\.
