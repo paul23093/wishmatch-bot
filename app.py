@@ -140,12 +140,16 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
         )
     )
 
-    reply_markup = InlineKeyboardMarkup.from_button(
-        button=InlineKeyboardButton(
+    reply_markup = InlineKeyboardMarkup([
+        [InlineKeyboardButton(
             text="Open wishmatch",
             url=f"https://t.me/wishmatch_bot/wishes?startapp={chat.id}",
-        )
-    )
+        )],
+        [InlineKeyboardButton(
+            text='Grant access',
+            callback_data='grant_access_inline'
+        )]
+    ])
 
     msg_text = f"""Hi {f"@{user.username}" if user.id == chat.id else "chat"}\!\n
 Please /grant access to your wishes to this chat\.
@@ -270,6 +274,117 @@ async def grant_access(update: Update, context: ContextTypes.DEFAULT_TYPE) -> No
     )
 
 
+async def grant_access_inline(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+    user = update.effective_user
+    chat = update.effective_chat
+    query = update.callback_query
+
+    try:
+        with psycopg2.connect(**con) as conn:
+            cur = conn.cursor()
+
+            cur.execute(f"""
+                select count(*)>0 as is_user_exists
+                from users
+                where tg_user_id = {user.id}
+                ;
+                """)
+
+            data_u = [dict((cur.description[i][0], value) for i, value in enumerate(row)) for row in cur.fetchall()][0]
+            if not data_u["is_user_exists"]:
+
+                user_photos = (await user.get_profile_photos(limit=1))
+                user_photo_base64 = "NULL"
+                if user_photos.total_count > 0:
+                    user_photo = (await user_photos.photos[0][0].get_file())
+                    user_photo_bytearray = (await user_photo.download_as_bytearray())
+                    user_photo_base64_encoded_str = base64.b64encode(user_photo_bytearray)
+                    user_photo_base64 = user_photo_base64_encoded_str.decode()
+
+                cur.execute(f"""
+                    insert into users (
+                        tg_user_id, 
+                        tg_username,
+                        tg_first_name,
+                        tg_last_name,
+                        tg_profile_photo
+                    ) 
+                    values (
+                        {user.id}, 
+                        {f"'{user.username}'" if user.username else "NULL"},
+                        {f"'{user.first_name}'" if user.first_name else "NULL"},
+                        {f"'{user.last_name}'" if user.last_name else "NULL"},
+                        {f"'{user_photo_base64}'" if user_photos.total_count > 0 else "NULL"}
+                    );
+                    """)
+
+            cur.execute(f"""
+                    select count(*)>0 as is_chat_exists
+                    from chats
+                    where tg_chat_id = {chat.id}
+                    ;
+                """)
+
+            data_c = [dict((cur.description[i][0], value) for i, value in enumerate(row)) for row in cur.fetchall()][0]
+            if not data_c["is_chat_exists"]:
+
+                chat_photo = (await context.bot.get_chat(chat.id)).photo
+                chat_photo_base64 = "NULL"
+                if chat_photo:
+                    chat_photo_small = (await chat_photo.get_small_file())
+                    chat_photo_bytearray = (await chat_photo_small.download_as_bytearray())
+                    chat_photo_base64_encoded_str = base64.b64encode(chat_photo_bytearray)
+                    chat_photo_base64 = chat_photo_base64_encoded_str.decode()
+
+                cur.execute(f"""
+                    insert into chats (
+                        tg_chat_id, 
+                        tg_chat_name,
+                        tg_chat_photo
+                    ) 
+                    values (
+                        {chat.id}, 
+                        {f"'{chat.title}'" if chat.title else "NULL"},
+                        {f"'{chat_photo_base64}'" if chat_photo else "NULL"}
+                    );
+                    """)
+
+            cur.execute(f"""
+                    select count(*)>0 as is_user_permission_exists
+                    from permissions
+                    where tg_user_id = {user.id}
+                    and tg_chat_id = {chat.id}
+                    ;
+                """)
+
+            data_up = [dict((cur.description[i][0], value) for i, value in enumerate(row)) for row in cur.fetchall()][0]
+            if not data_up["is_user_permission_exists"]:
+                cur.execute(f"""
+                    insert into permissions (
+                        tg_user_id, 
+                        tg_chat_id
+                    ) 
+                    values (
+                        {user.id}, 
+                        {chat.id}
+                    );""")
+
+            else:
+                cur.execute(f"""
+                        update permissions 
+                        set is_deleted = false
+                        where tg_user_id = {user.id}
+                        and tg_chat_id = {chat.id}
+                    ;""")
+            conn.commit()
+    except (Exception, psycopg2.DatabaseError) as error:
+        print(error)
+
+    await query.answer(
+        text="You have successfully shared your wishes with the chat."
+    )
+
+
 async def revoke_access(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     user = update.effective_user
     chat = update.effective_chat
@@ -373,6 +488,7 @@ def main() -> None:
 
     application.add_handler(CommandHandler("start", start))
     application.add_handler(CommandHandler("grant", grant_access))
+    application.add_handler(CallbackQueryHandler(grant_access_inline))
     application.add_handler(CommandHandler("revoke", revoke_access))
     application.add_handler(CommandHandler("update_info", update_info))
 
