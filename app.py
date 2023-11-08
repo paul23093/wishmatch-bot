@@ -499,10 +499,21 @@ async def launch_santa(update: Update, context: ContextTypes.DEFAULT_TYPE) -> No
                         can_promote_members=True,
                         can_change_info=True,
                         can_invite_users=True
-                    )
+                    ),
+                    bot_administrator_rights=ChatAdministratorRights(
+                        is_anonymous=False,
+                        can_manage_chat=True,
+                        can_delete_messages=True,
+                        can_manage_video_chats=True,
+                        can_restrict_members=False,
+                        can_promote_members=False,
+                        can_change_info=True,
+                        can_invite_users=True
+                    ),
                 )
             )
-        ]]
+        ]],
+        resize_keyboard=True
     )
 
     await context.bot.send_message(
