@@ -3,7 +3,7 @@ import json
 import base64
 import os
 import psycopg2
-from telegram import Update, InlineKeyboardMarkup, InlineKeyboardButton, WebAppInfo, ReplyKeyboardMarkup, ReplyKeyboardRemove, KeyboardButton, MenuButtonWebApp
+from telegram import Update, InlineKeyboardMarkup, InlineKeyboardButton, WebAppInfo, ReplyKeyboardMarkup, ReplyKeyboardRemove, KeyboardButton, MenuButtonWebApp, KeyboardButtonRequestChat, ChatAdministratorRights
 from telegram.ext import ApplicationBuilder, CommandHandler, ContextTypes, CallbackQueryHandler, ConversationHandler, MessageHandler, filters
 from telegram.constants import ParseMode
 from dotenv import load_dotenv
@@ -479,6 +479,29 @@ Please note you can always /revoke the access if you want\.\n"""
         print(error)
 
 
+async def launch_santa(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+    chat = update.effective_chat
+
+    reply_markup = ReplyKeyboardMarkup(
+        [[
+            KeyboardButton(
+                text='Choose group',
+                request_chat=KeyboardButtonRequestChat(
+                    bot_is_member=True,
+                    user_administrator_rights=ChatAdministratorRights(can_manage_chat=True)
+                )
+            )
+        ]]
+    )
+
+    await context.bot.send_message(
+        text='Please choose the group where you would like to launch Secret Santa.',
+        chat_id=chat.id,
+        parse_mode=ParseMode.MARKDOWN_V2,
+        reply_markup=reply_markup
+    )
+
+
 def main() -> None:
     application = ApplicationBuilder().token(token).build()
 
@@ -487,6 +510,7 @@ def main() -> None:
     # application.add_handler(CallbackQueryHandler(grant_access_inline))
     application.add_handler(CommandHandler("revoke", revoke_access))
     application.add_handler(CommandHandler("update_info", update_info))
+    application.add_handler(CommandHandler("santa", launch_santa))
 
     application.run_polling(allowed_updates=Update.ALL_TYPES)
 
