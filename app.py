@@ -506,7 +506,7 @@ async def launch_santa(update: Update, context: ContextTypes.DEFAULT_TYPE) -> No
     )
 
     await context.bot.send_message(
-        text='Please choose the group where you would like to launch Secret Santa.',
+        text='Please choose the group where you would like to launch Secret Santa\.',
         chat_id=chat.id,
         parse_mode=ParseMode.MARKDOWN_V2,
         reply_markup=reply_markup
