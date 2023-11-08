@@ -487,7 +487,9 @@ async def launch_santa(update: Update, context: ContextTypes.DEFAULT_TYPE) -> No
             KeyboardButton(
                 text='Choose group',
                 request_chat=KeyboardButtonRequestChat(
+                    request_id=1,
                     bot_is_member=True,
+                    chat_is_channel=False,
                     user_administrator_rights=ChatAdministratorRights(
                         is_anonymous=False,
                         can_manage_chat=True,
