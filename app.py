@@ -513,15 +513,17 @@ async def launch_santa(update: Update, context: ContextTypes.DEFAULT_TYPE) -> No
                 )
             )
         ]],
-        resize_keyboard=True
+        resize_keyboard=True,
     )
 
-    await context.bot.send_message(
-        text='Please choose the group where you would like to launch Secret Santa\.',
+    message = await context.bot.send_message(
+        text='Please choose any group where you would like to launch Secret Santa\.',
         chat_id=chat.id,
         parse_mode=ParseMode.MARKDOWN_V2,
         reply_markup=reply_markup
     )
+
+    print(message.chat_shared.chat_id)
 
 
 def main() -> None:
