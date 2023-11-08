@@ -488,7 +488,7 @@ def main() -> None:
 
     application.add_handler(CommandHandler("start", start))
     application.add_handler(CommandHandler("grant", grant_access))
-    application.add_handler(CallbackQueryHandler(grant_access_inline))
+    # application.add_handler(CallbackQueryHandler(grant_access_inline))
     application.add_handler(CommandHandler("revoke", revoke_access))
     application.add_handler(CommandHandler("update_info", update_info))
 
