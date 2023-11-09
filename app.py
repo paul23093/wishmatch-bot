@@ -521,6 +521,7 @@ async def launch_secret_santa(update: Update, context: ContextTypes.DEFAULT_TYPE
                 )
             ]
         ],
+        resize_keyboard=True
     )
 
     await context.bot.send_message(
@@ -533,7 +534,6 @@ async def launch_secret_santa(update: Update, context: ContextTypes.DEFAULT_TYPE
 
 async def select_santa_chat(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     message = update.effective_message
-    user = update.effective_user
     chat = update.effective_chat
     chat_id = message.chat_shared.chat_id
 
@@ -541,14 +541,14 @@ async def select_santa_chat(update: Update, context: ContextTypes.DEFAULT_TYPE) 
 
     await message.delete()
 
-    message = await context.bot.send_message(
+    msg = await context.bot.send_message(
         chat_id=chat.id,
         text="The group is selected\!\nYou can set schedule when Secret Santa joining should be locked\.\nAfter this date and time users will be randomly assigned automatically\.\nAlso you will be able to lock it manually\.",
         parse_mode=ParseMode.MARKDOWN_V2,
         reply_markup=ReplyKeyboardRemove()
     )
 
-    await message.edit_reply_markup(
+    await msg.edit_reply_markup(
         reply_markup=InlineKeyboardMarkup([
             [
                 InlineKeyboardButton(
