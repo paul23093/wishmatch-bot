@@ -536,6 +536,7 @@ async def get_shared_chat(update: Update, context: ContextTypes.DEFAULT_TYPE) ->
         parse_mode=ParseMode.MARKDOWN_V2,
         reply_markup=ReplyKeyboardRemove()
     )
+    await message.delete()
 
     reply_markup = InlineKeyboardMarkup.from_button(
         button=InlineKeyboardButton(
