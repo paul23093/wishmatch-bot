@@ -539,6 +539,7 @@ async def get_shared_chat(update: Update, context: ContextTypes.DEFAULT_TYPE) ->
     await context.bot.send_message(
         chat_id=chat_id,
         text=f"@{user.username} has launched Secret Santa activity\! Hurry up and join if you would like to participate\!",
+        parse_mode=ParseMode.MARKDOWN_V2,
         reply_markup=reply_markup
     )
 
