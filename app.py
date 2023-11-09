@@ -548,8 +548,9 @@ async def select_santa_chat(update: Update, context: ContextTypes.DEFAULT_TYPE) 
         reply_markup=ReplyKeyboardRemove()
     )
 
-    await msg.edit_text(
-        text=msg.text,
+    print(msg.to_json())
+
+    await msg.edit_reply_markup(
         reply_markup=InlineKeyboardMarkup([
             [
                 InlineKeyboardButton(
@@ -613,11 +614,7 @@ async def publish_secret_santa(update: Update, context: ContextTypes.DEFAULT_TYP
             reply_markup=reply_markup
         )
 
-
-
-async def join_secret_santa(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
-    query = update.callback_query
-    if query.data == "join":
+    elif query.data == "join":
         await query.answer("Nothing happened cause it is test")
 
 
@@ -632,7 +629,7 @@ def main() -> None:
 
     application.add_handler(CommandHandler("santa", launch_secret_santa))
     application.add_handler(MessageHandler(filters.StatusUpdate.CHAT_SHARED, select_santa_chat))
-    application.add_handler(CallbackQueryHandler(join_secret_santa))
+    application.add_handler(CallbackQueryHandler(publish_secret_santa))
 
     application.run_polling(allowed_updates=Update.ALL_TYPES)
 
