@@ -529,15 +529,13 @@ async def get_shared_chat(update: Update, context: ContextTypes.DEFAULT_TYPE) ->
     user = update.effective_user
     chat_id = message.chat_shared.chat_id
 
-    await message.edit_reply_markup(
-        reply_markup=ReplyKeyboardRemove()
-    )
-
-    reply_markup = InlineKeyboardMarkup.from_button(
-        button=InlineKeyboardButton(
+    reply_markup = InlineKeyboardMarkup([[
+        InlineKeyboardButton(
             text="I'm in!",
             callback_data="join"
-        )
+        ),
+        ReplyKeyboardRemove()
+    ]]
     )
 
     await context.bot.send_message(
