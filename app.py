@@ -531,7 +531,7 @@ async def get_shared_chat(update: Update, context: ContextTypes.DEFAULT_TYPE) ->
 
     reply_markup = InlineKeyboardMarkup([[
         InlineKeyboardButton(
-            text="I'm in!",
+            text="I am in!",
             callback_data="join"
         ),
         ReplyKeyboardRemove()
