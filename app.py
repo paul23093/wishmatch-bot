@@ -529,11 +529,13 @@ async def launch_santa(update: Update, context: ContextTypes.DEFAULT_TYPE) -> No
 async def get_shared_chat(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     message = update.effective_message
     user = update.effective_user
+    chat = update.effective_chat
     chat_id = message.chat_shared.chat_id
 
     await message.delete()
 
     await context.bot.send_message(
+        chat_id=chat.id,
         text="The announcement has been sent to the group\!",
         parse_mode=ParseMode.MARKDOWN_V2,
         reply_markup=ReplyKeyboardRemove()
