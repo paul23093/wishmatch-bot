@@ -549,6 +549,7 @@ async def select_santa_chat(update: Update, context: ContextTypes.DEFAULT_TYPE) 
     )
 
     await msg.edit_text(
+        text=msg.text,
         reply_markup=InlineKeyboardMarkup([
             [
                 InlineKeyboardButton(
