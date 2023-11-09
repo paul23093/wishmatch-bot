@@ -513,18 +513,40 @@ async def launch_santa(update: Update, context: ContextTypes.DEFAULT_TYPE) -> No
                 )
             )
         ]],
-        resize_keyboard=True,
+        resize_keyboard=True
     )
 
-    message = await context.bot.send_message(
+    await context.bot.send_message(
         text='Please choose any group where you would like to launch Secret Santa\.',
         chat_id=chat.id,
         parse_mode=ParseMode.MARKDOWN_V2,
         reply_markup=reply_markup
     )
 
-    print(message.chat_shared.chat_id)
 
+async def get_shared_chat(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+    message = update.effective_message
+    user = update.effective_user
+    chat_id = message.chat_shared.chat_id
+
+    reply_markup = InlineKeyboardMarkup.from_button(
+        button=InlineKeyboardButton(
+            text="I'm in!",
+            callback_data="join"
+        )
+    )
+
+    await context.bot.send_message(
+        chat_id=chat_id,
+        text=f"@{user.username} has launched Secret Santa activity\! Hurry up and join if you would like to participate\!",
+        reply_markup=reply_markup
+    )
+
+
+async def join_secret_santa(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+    query = update.callback_query
+    if query.data == "join":
+        await query.answer("Nothing happened cause it is test")
 
 def main() -> None:
     application = ApplicationBuilder().token(token).build()
@@ -534,7 +556,10 @@ def main() -> None:
     # application.add_handler(CallbackQueryHandler(grant_access_inline))
     application.add_handler(CommandHandler("revoke", revoke_access))
     application.add_handler(CommandHandler("update_info", update_info))
+
     application.add_handler(CommandHandler("santa", launch_santa))
+    application.add_handler(MessageHandler(filters.StatusUpdate.CHAT_SHARED, get_shared_chat))
+    application.add_handler(CallbackQueryHandler(join_secret_santa))
 
     application.run_polling(allowed_updates=Update.ALL_TYPES)
 
