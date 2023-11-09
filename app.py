@@ -513,8 +513,7 @@ async def launch_santa(update: Update, context: ContextTypes.DEFAULT_TYPE) -> No
                 )
             )
         ]],
-        resize_keyboard=True,
-        one_time_keyboard=True
+        resize_keyboard=True
     )
 
     await context.bot.send_message(
