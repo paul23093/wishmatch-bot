@@ -513,7 +513,8 @@ async def launch_santa(update: Update, context: ContextTypes.DEFAULT_TYPE) -> No
                 )
             )
         ]],
-        resize_keyboard=True
+        resize_keyboard=True,
+        one_time_keyboard=True
     )
 
     await context.bot.send_message(
@@ -548,6 +549,7 @@ async def join_secret_santa(update: Update, context: ContextTypes.DEFAULT_TYPE) 
     query = update.callback_query
     if query.data == "join":
         await query.answer("Nothing happened cause it is test")
+
 
 def main() -> None:
     application = ApplicationBuilder().token(token).build()
