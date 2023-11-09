@@ -481,8 +481,12 @@ Please note you can always /revoke the access if you want\.\n"""
         print(error)
 
 
-async def launch_santa(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+async def launch_secret_santa(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     chat = update.effective_chat
+    user = update.effective_user
+
+    if user.id != chat.id:
+        return
 
     reply_markup = ReplyKeyboardMarkup(
         [[
@@ -571,7 +575,7 @@ def main() -> None:
     application.add_handler(CommandHandler("revoke", revoke_access))
     application.add_handler(CommandHandler("update_info", update_info))
 
-    application.add_handler(CommandHandler("santa", launch_santa))
+    application.add_handler(CommandHandler("santa", launch_secret_santa))
     application.add_handler(MessageHandler(filters.StatusUpdate.CHAT_SHARED, get_shared_chat))
     application.add_handler(CallbackQueryHandler(join_secret_santa))
 
