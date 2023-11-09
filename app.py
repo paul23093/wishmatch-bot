@@ -529,19 +529,21 @@ async def get_shared_chat(update: Update, context: ContextTypes.DEFAULT_TYPE) ->
     user = update.effective_user
     chat_id = message.chat_shared.chat_id
 
-    reply_markup = InlineKeyboardMarkup([[
-        InlineKeyboardButton(
+    reply_markup = InlineKeyboardMarkup.from_button(
+        button=InlineKeyboardButton(
             text="I am in!",
             callback_data="join"
-        ),
-        ReplyKeyboardRemove()
-    ]]
+        )
     )
 
-    await context.bot.send_message(
+    message = await context.bot.send_message(
         chat_id=chat_id,
         text=f"@{user.username} has launched Secret Santa activity\! Hurry up and join if you would like to participate\!",
         parse_mode=ParseMode.MARKDOWN_V2,
+        reply_markup=ReplyKeyboardRemove()
+    )
+
+    await message.edit_reply_markup(
         reply_markup=reply_markup
     )
 
