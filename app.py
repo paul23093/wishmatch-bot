@@ -489,37 +489,38 @@ async def launch_secret_santa(update: Update, context: ContextTypes.DEFAULT_TYPE
         return
 
     reply_markup = ReplyKeyboardMarkup(
-        [[
-            KeyboardButton(
-                text='Choose group',
-                request_chat=KeyboardButtonRequestChat(
-                    request_id=1,
-                    bot_is_member=True,
-                    chat_is_channel=False,
-                    user_administrator_rights=ChatAdministratorRights(
-                        is_anonymous=False,
-                        can_manage_chat=True,
-                        can_delete_messages=True,
-                        can_manage_video_chats=True,
-                        can_restrict_members=True,
-                        can_promote_members=True,
-                        can_change_info=True,
-                        can_invite_users=True
-                    ),
-                    bot_administrator_rights=ChatAdministratorRights(
-                        is_anonymous=False,
-                        can_manage_chat=True,
-                        can_delete_messages=True,
-                        can_manage_video_chats=True,
-                        can_restrict_members=False,
-                        can_promote_members=False,
-                        can_change_info=True,
-                        can_invite_users=True
-                    ),
+        [
+            [
+                KeyboardButton(
+                    text='Choose group',
+                    request_chat=KeyboardButtonRequestChat(
+                        request_id=1,
+                        bot_is_member=True,
+                        chat_is_channel=False,
+                        user_administrator_rights=ChatAdministratorRights(
+                            is_anonymous=False,
+                            can_manage_chat=True,
+                            can_delete_messages=True,
+                            can_manage_video_chats=True,
+                            can_restrict_members=True,
+                            can_promote_members=True,
+                            can_change_info=True,
+                            can_invite_users=True
+                        ),
+                        bot_administrator_rights=ChatAdministratorRights(
+                            is_anonymous=False,
+                            can_manage_chat=True,
+                            can_delete_messages=True,
+                            can_manage_video_chats=True,
+                            can_restrict_members=False,
+                            can_promote_members=False,
+                            can_change_info=True,
+                            can_invite_users=True
+                        ),
+                    )
                 )
-            )
-        ]],
-        resize_keyboard=True
+            ]
+        ],
     )
 
     await context.bot.send_message(
@@ -530,34 +531,87 @@ async def launch_secret_santa(update: Update, context: ContextTypes.DEFAULT_TYPE
     )
 
 
-async def get_shared_chat(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+async def select_santa_chat(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     message = update.effective_message
     user = update.effective_user
     chat = update.effective_chat
     chat_id = message.chat_shared.chat_id
 
+    context.user_data["chat_id"] = chat_id
+
     await message.delete()
 
-    await context.bot.send_message(
+    message = await context.bot.send_message(
         chat_id=chat.id,
-        text="The announcement has been sent to the group\!",
+        text="The group is selected\!\nYou can set schedule when Secret Santa joining should be locked\.\nAfter this date and time users will be randomly assigned automatically\.\nAlso you will be able to lock it manually\.",
         parse_mode=ParseMode.MARKDOWN_V2,
         reply_markup=ReplyKeyboardRemove()
     )
 
-    reply_markup = InlineKeyboardMarkup.from_button(
-        button=InlineKeyboardButton(
-            text="I'm in!",
-            callback_data="join"
-        )
+    await message.edit_reply_markup(
+        reply_markup=InlineKeyboardMarkup([
+            [
+                InlineKeyboardButton(
+                    text="Set Schedule",
+                    callback_data="schedule"
+                )
+            ],
+            [
+                InlineKeyboardButton(
+                    text="Publish",
+                    callback_data="publish"
+                )
+            ]
+        ])
     )
 
-    await context.bot.send_message(
-        chat_id=chat_id,
-        text=f"@{user.username} has launched Secret Santa activity\! Hurry up and join if you would like to participate\!",
-        parse_mode=ParseMode.MARKDOWN_V2,
-        reply_markup=reply_markup
-    )
+
+async def publish_secret_santa(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+    message = update.effective_message
+    query = update.callback_query
+    user = update.effective_user
+    chat_id = context.user_data["chat_id"]
+
+    if query.data == "publish":
+        await message.edit_text(
+            text="The announcement has been published to the group\.",
+            parse_mode=ParseMode.MARKDOWN_V2,
+            reply_markup=InlineKeyboardMarkup([
+                [
+                    InlineKeyboardButton(
+                        text="Set Schedule",
+                        callback_data="schedule"
+                    )
+                ],
+                [
+                    InlineKeyboardButton(
+                        text="Lock and Generate Santas",
+                        callback_data="lock"
+                    )
+                ],
+                [
+                    InlineKeyboardButton(
+                        text="End Secret Santa",
+                        callback_data="close"
+                    )
+                ]
+            ])
+        )
+
+        reply_markup = InlineKeyboardMarkup.from_button(
+            button=InlineKeyboardButton(
+                text="I'm in!",
+                callback_data="join"
+            )
+        )
+
+        await context.bot.send_message(
+            chat_id=chat_id,
+            text=f"@{user.username} has launched Secret Santa activity\! Hurry up and join if you would like to participate\!",
+            parse_mode=ParseMode.MARKDOWN_V2,
+            reply_markup=reply_markup
+        )
+
 
 
 async def join_secret_santa(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
@@ -576,7 +630,7 @@ def main() -> None:
     application.add_handler(CommandHandler("update_info", update_info))
 
     application.add_handler(CommandHandler("santa", launch_secret_santa))
-    application.add_handler(MessageHandler(filters.StatusUpdate.CHAT_SHARED, get_shared_chat))
+    application.add_handler(MessageHandler(filters.StatusUpdate.CHAT_SHARED, select_santa_chat))
     application.add_handler(CallbackQueryHandler(join_secret_santa))
 
     application.run_polling(allowed_updates=Update.ALL_TYPES)
