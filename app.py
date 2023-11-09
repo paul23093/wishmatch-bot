@@ -3,8 +3,10 @@ import json
 import base64
 import os
 import psycopg2
-from telegram import Update, InlineKeyboardMarkup, InlineKeyboardButton, WebAppInfo, ReplyKeyboardMarkup, ReplyKeyboardRemove, KeyboardButton, MenuButtonWebApp, KeyboardButtonRequestChat, ChatAdministratorRights
-from telegram.ext import ApplicationBuilder, CommandHandler, ContextTypes, CallbackQueryHandler, ConversationHandler, MessageHandler, filters
+from telegram import Update, InlineKeyboardMarkup, InlineKeyboardButton, WebAppInfo, ReplyKeyboardMarkup, \
+    ReplyKeyboardRemove, KeyboardButton, MenuButtonWebApp, KeyboardButtonRequestChat, ChatAdministratorRights
+from telegram.ext import ApplicationBuilder, CommandHandler, ContextTypes, CallbackQueryHandler, ConversationHandler, \
+    MessageHandler, filters
 from telegram.constants import ParseMode
 from dotenv import load_dotenv
 
@@ -48,7 +50,6 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
 
             data_u = [dict((cur.description[i][0], value) for i, value in enumerate(row)) for row in cur.fetchall()][0]
             if not data_u["is_user_exists"]:
-
                 cur.execute(f"""
                 insert into users (
                     tg_user_id, 
@@ -105,7 +106,8 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
                     ;
                 """)
 
-                data_up = [dict((cur.description[i][0], value) for i, value in enumerate(row)) for row in cur.fetchall()][0]
+                data_up = \
+                [dict((cur.description[i][0], value) for i, value in enumerate(row)) for row in cur.fetchall()][0]
                 if not data_up["is_user_permission_exists"]:
                     cur.execute(f"""
                         insert into permissions (
@@ -529,6 +531,12 @@ async def get_shared_chat(update: Update, context: ContextTypes.DEFAULT_TYPE) ->
     user = update.effective_user
     chat_id = message.chat_shared.chat_id
 
+    await message.reply_text(
+        text="The announcement has been sent to the group\!",
+        parse_mode=ParseMode.MARKDOWN_V2,
+        reply_markup=ReplyKeyboardRemove()
+    )
+
     reply_markup = InlineKeyboardMarkup.from_button(
         button=InlineKeyboardButton(
             text="I'm in!",
@@ -536,14 +544,10 @@ async def get_shared_chat(update: Update, context: ContextTypes.DEFAULT_TYPE) ->
         )
     )
 
-    message = await context.bot.send_message(
+    await context.bot.send_message(
         chat_id=chat_id,
         text=f"@{user.username} has launched Secret Santa activity\! Hurry up and join if you would like to participate\!",
         parse_mode=ParseMode.MARKDOWN_V2,
-        reply_markup=ReplyKeyboardRemove()
-    )
-
-    await message.edit_reply_markup(
         reply_markup=reply_markup
     )
 
