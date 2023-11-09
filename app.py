@@ -531,12 +531,13 @@ async def get_shared_chat(update: Update, context: ContextTypes.DEFAULT_TYPE) ->
     user = update.effective_user
     chat_id = message.chat_shared.chat_id
 
-    await message.reply_text(
+    await message.delete()
+
+    await context.bot.send_message(
         text="The announcement has been sent to the group\!",
         parse_mode=ParseMode.MARKDOWN_V2,
         reply_markup=ReplyKeyboardRemove()
     )
-    await message.delete()
 
     reply_markup = InlineKeyboardMarkup.from_button(
         button=InlineKeyboardButton(
