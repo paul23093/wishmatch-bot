@@ -568,12 +568,12 @@ async def publish_secret_santa(update: Update, context: ContextTypes.DEFAULT_TYP
     message = update.effective_message
     query = update.callback_query
     user = update.effective_user
-    chat_id = context.user_data["chat_id"]
 
     if query.data == "publish":
+        chat_id = context.user_data["chat_id"]
         await message.edit_text(
-            text="The announcement has been published to the group\.",
-            parse_mode=ParseMode.MARKDOWN_V2,
+            text="The announcement has been published to the group.",
+            parse_mode=ParseMode.HTML,
             reply_markup=InlineKeyboardMarkup([
                 [
                     InlineKeyboardButton(
@@ -605,8 +605,8 @@ async def publish_secret_santa(update: Update, context: ContextTypes.DEFAULT_TYP
 
         await context.bot.send_message(
             chat_id=chat_id,
-            text=f"@{user.username} has launched Secret Santa activity\! Hurry up and join if you would like to participate\!",
-            parse_mode=ParseMode.MARKDOWN_V2,
+            text=f"@{user.username} has launched Secret Santa activity! Hurry up and join if you would like to participate!",
+            parse_mode=ParseMode.HTML,
             reply_markup=reply_markup
         )
 
