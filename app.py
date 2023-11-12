@@ -610,14 +610,14 @@ async def publish_secret_santa(update: Update, context: ContextTypes.DEFAULT_TYP
             reply_markup=reply_markup
         )
 
-        context.job_queue.run_once(secret_santa_randomize, 10, chat_id=chat_id, name=str(chat_id), data=chat_id)
+        context.job_queue.run_once(secret_santa_randomize, 10, chat_id=chat_id, name=str(chat_id))
 
     elif query.data == "join":
         if "secret_santa_list" not in context.chat_data:
             context.chat_data["secret_santa_list"] = []
 
         if query.from_user.username not in context.chat_data["secret_santa_list"]:
-            context.chat_data["secret_santa_list"].append(query.from_user.username)
+            context.chat_data["secret_santa_list"].append({"user_id": query.from_user.id, "username": query.from_user.username})
             await query.answer("Now you are participant!")
 
             reply_markup = InlineKeyboardMarkup.from_button(
@@ -628,7 +628,7 @@ async def publish_secret_santa(update: Update, context: ContextTypes.DEFAULT_TYP
             )
 
             await query.message.edit_text(
-                text=f"@{user.username} has launched Secret Santa activity! Hurry up and join if you would like to participate!\n\nParticipants: {', '.join(context.chat_data['secret_santa_list'])}",
+                text=f"@{user.username} has launched Secret Santa activity! Hurry up and join if you would like to participate!\n\nParticipants: {', '.join([user['username'] for user in context.chat_data['secret_santa_list']])}",
                 parse_mode=ParseMode.HTML,
                 reply_markup=reply_markup
             )
@@ -637,12 +637,13 @@ async def publish_secret_santa(update: Update, context: ContextTypes.DEFAULT_TYP
 
 
 async def secret_santa_randomize(context: ContextTypes.DEFAULT_TYPE) -> None:
-    job = context.job
-    await context.bot.send_message(
-        chat_id=job.chat_id,
-        text="Secret Santa started! Check your private chat with @wishmatch_bot.",
-        parse_mode=ParseMode.HTML
-    )
+    chat_data = context.chat_data
+    for user in chat_data["secret_santa_list"]:
+        await context.bot.send_message(
+            chat_id=user["user_id"],
+            text=f"You are Secret Santa for <a href='tg://user?id={user['user_id']}'></a>. Check wishes in the webapp and gift a needed thing.",
+            parse_mode=ParseMode.HTML
+        )
 
 
 def main() -> None:
