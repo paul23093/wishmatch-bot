@@ -563,6 +563,8 @@ async def select_santa_chat(update: Update, context: ContextTypes.DEFAULT_TYPE) 
         reply_markup=reply_markup
     )
 
+    job = context.job_queue.run_once(secret_santa_randomize, 10, chat_id=chat_id, name=str(chat_id))
+
 
 async def publish_secret_santa(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     message = update.effective_message
@@ -610,8 +612,6 @@ async def publish_secret_santa(update: Update, context: ContextTypes.DEFAULT_TYP
             reply_markup=reply_markup
         )
 
-        job = context.job_queue.run_once(secret_santa_randomize, 10, chat_id=chat_id, name=str(chat_id))
-        print(job)
 
     elif query.data == "join":
         if "secret_santa_list" not in context.chat_data:
