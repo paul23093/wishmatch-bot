@@ -613,7 +613,11 @@ async def publish_secret_santa(update: Update, context: ContextTypes.DEFAULT_TYP
         )
 
     elif query.data == "join":
-        await query.answer("Nothing happened cause it is test")
+        context.chat_data["secret_santa_list"].append(query.from_user.username)
+        await query.message.edit_text(
+            text=query.message.text + f"\n\nParticipants: {context.chat_data['secret_santa_list']}"
+        )
+        await query.answer("Now you are participant!")
 
 
 def main() -> None:
