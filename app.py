@@ -611,7 +611,7 @@ async def publish_secret_santa(update: Update, context: ContextTypes.DEFAULT_TYP
         )
 
     elif query.data == "join":
-        if not context.chat_data["secret_santa_list"]:
+        if "secret_santa_list" not in context.chat_data:
             context.chat_data["secret_santa_list"] = []
         context.chat_data["secret_santa_list"].append(query.from_user.username)
         await query.message.edit_text(
