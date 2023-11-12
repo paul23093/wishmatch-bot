@@ -563,6 +563,8 @@ async def select_santa_chat(update: Update, context: ContextTypes.DEFAULT_TYPE) 
         reply_markup=reply_markup
     )
 
+    context.chat_data["secret_santa_list"] = []
+
 
 async def publish_secret_santa(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     message = update.effective_message
