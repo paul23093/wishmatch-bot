@@ -541,28 +541,11 @@ async def select_santa_chat(update: Update, context: ContextTypes.DEFAULT_TYPE) 
 
     await message.delete()
 
-    msg = await context.bot.send_message(
+    await context.bot.send_message(
         chat_id=chat.id,
         text="The group is selected\!\nYou can set schedule when Secret Santa joining should be locked\.\nAfter this date and time users will be randomly assigned automatically\.\nAlso you will be able to lock it manually\.",
         parse_mode=ParseMode.MARKDOWN_V2,
         reply_markup=ReplyKeyboardRemove()
-    )
-
-    await msg.edit_reply_markup(
-        reply_markup=InlineKeyboardMarkup([
-            [
-                InlineKeyboardButton(
-                    text="Set Schedule",
-                    callback_data="schedule"
-                )
-            ],
-            [
-                InlineKeyboardButton(
-                    text="Publish",
-                    callback_data="publish"
-                )
-            ]
-        ])
     )
 
 
