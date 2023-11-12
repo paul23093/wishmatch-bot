@@ -617,21 +617,21 @@ async def publish_secret_santa(update: Update, context: ContextTypes.DEFAULT_TYP
         if query.from_user.username not in context.chat_data["secret_santa_list"]:
             context.chat_data["secret_santa_list"].append(query.from_user.username)
             await query.answer("Now you are participant!")
+
+            reply_markup = InlineKeyboardMarkup.from_button(
+                button=InlineKeyboardButton(
+                    text="I'm in!",
+                    callback_data="join"
+                )
+            )
+
+            await query.message.edit_text(
+                text=query.message.text + f"\n\nParticipants: {', '.join(context.chat_data['secret_santa_list'])}",
+                parse_mode=ParseMode.HTML,
+                reply_markup=reply_markup
+            )
         else:
             await query.answer("You are already participating")
-
-        reply_markup = InlineKeyboardMarkup.from_button(
-            button=InlineKeyboardButton(
-                text="I'm in!",
-                callback_data="join"
-            )
-        )
-
-        await query.message.edit_text(
-            text=query.message.text + f"\n\nParticipants: {', '.join(context.chat_data['secret_santa_list'])}",
-            parse_mode=ParseMode.HTML,
-            reply_markup=reply_markup
-        )
 
 
 def main() -> None:
