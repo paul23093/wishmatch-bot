@@ -610,6 +610,8 @@ async def publish_secret_santa(update: Update, context: ContextTypes.DEFAULT_TYP
             reply_markup=reply_markup
         )
 
+        context.job_queue.run_once(secret_santa_randomize, 10, chat_id=chat_id, name=str(chat_id), data=chat_id)
+
     elif query.data == "join":
         if "secret_santa_list" not in context.chat_data:
             context.chat_data["secret_santa_list"] = []
@@ -632,6 +634,15 @@ async def publish_secret_santa(update: Update, context: ContextTypes.DEFAULT_TYP
             )
         else:
             await query.answer("You are already participating")
+
+
+async def secret_santa_randomize(context: ContextTypes.DEFAULT_TYPE) -> None:
+    job = context.job
+    await context.bot.send_message(
+        chat_id=job.chat_id,
+        text="Secret Santa started! Check your private chat with @wishmatch_bot.",
+        parse_mode=ParseMode.HTML
+    )
 
 
 def main() -> None:
