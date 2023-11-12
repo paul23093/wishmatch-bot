@@ -535,6 +535,7 @@ async def launch_secret_santa(update: Update, context: ContextTypes.DEFAULT_TYPE
 async def select_santa_chat(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     message = update.effective_message
     chat = update.effective_chat
+    user = update.effective_user
     chat_id = message.chat_shared.chat_id
 
     context.user_data["chat_id"] = chat_id
@@ -546,6 +547,20 @@ async def select_santa_chat(update: Update, context: ContextTypes.DEFAULT_TYPE) 
         text="The group is selected\!\nYou can set schedule when Secret Santa joining should be locked\.\nAfter this date and time users will be randomly assigned automatically\.\nAlso you will be able to lock it manually\.",
         parse_mode=ParseMode.MARKDOWN_V2,
         reply_markup=ReplyKeyboardRemove()
+    )
+
+    reply_markup = InlineKeyboardMarkup.from_button(
+        button=InlineKeyboardButton(
+            text="I'm in!",
+            callback_data="join"
+        )
+    )
+
+    await context.bot.send_message(
+        chat_id=chat_id,
+        text=f"@{user.username} has launched Secret Santa activity\! Hurry up and join if you would like to participate\!",
+        parse_mode=ParseMode.MARKDOWN_V2,
+        reply_markup=reply_markup
     )
 
 
