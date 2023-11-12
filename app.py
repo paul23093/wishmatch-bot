@@ -628,7 +628,7 @@ async def publish_secret_santa(update: Update, context: ContextTypes.DEFAULT_TYP
         )
 
         await query.message.edit_text(
-            text=query.message.text + f"<br><br>Participants: {', '.join(context.chat_data['secret_santa_list'])}",
+            text=query.message.text + f"\n\nParticipants: {', '.join(context.chat_data['secret_santa_list'])}",
             parse_mode=ParseMode.HTML,
             reply_markup=reply_markup
         )
