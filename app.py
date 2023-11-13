@@ -524,12 +524,14 @@ async def launch_secret_santa(update: Update, context: ContextTypes.DEFAULT_TYPE
         resize_keyboard=True
     )
 
-    await context.bot.send_message(
+    msg = await context.bot.send_message(
         text="Please choose any group where you would like to launch Secret Santa.",
         chat_id=chat.id,
         parse_mode=ParseMode.HTML,
         reply_markup=reply_markup
     )
+
+    context.chat_data["message_choose"] = msg
 
 
 async def select_santa_chat(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
@@ -537,8 +539,17 @@ async def select_santa_chat(update: Update, context: ContextTypes.DEFAULT_TYPE) 
     chat = update.effective_chat
     user = update.effective_user
     chat_id = message.chat_shared.chat_id
+    msg = context.chat_data["message_choose"]
 
     context.user_data["chat_id"] = chat_id
+
+    await message.delete()
+
+    await context.bot.edit_message_reply_markup(
+        message_id=msg.id,
+        chat_id=msg.chat_id,
+        reply_markup=ReplyKeyboardRemove()
+    )
 
     reply_markup = InlineKeyboardMarkup([
                 [
@@ -555,12 +566,12 @@ async def select_santa_chat(update: Update, context: ContextTypes.DEFAULT_TYPE) 
                 ]
             ])
 
-    await context.bot.send_message(
-        chat_id=chat.id,
-        text="The group has been selected!",
-        parse_mode=ParseMode.HTML,
-        reply_markup=ReplyKeyboardRemove()
-    )
+    # await context.bot.send_message(
+    #     chat_id=chat.id,
+    #     text="The group has been selected!",
+    #     parse_mode=ParseMode.HTML,
+    #     reply_markup=ReplyKeyboardRemove()
+    # )
 
     await context.bot.send_message(
         chat_id=chat.id,
