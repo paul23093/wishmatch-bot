@@ -639,8 +639,9 @@ async def join_secret_santa(update: Update, context: ContextTypes.DEFAULT_TYPE) 
             )
         )
 
+        message_text = query.message.text
         await query.message.edit_text(
-            text=f"@{user.username} has launched Secret Santa activity! Hurry up and join if you would like to participate!\n\nParticipants: {', '.join([user['username'] for user in context.chat_data['secret_santa_list']])}",
+            text=f"{message_text}\n\nParticipants: {', '.join([user['username'] for user in context.chat_data['secret_santa_list']])}",
             parse_mode=ParseMode.HTML,
             reply_markup=reply_markup
         )
