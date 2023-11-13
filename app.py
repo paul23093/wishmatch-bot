@@ -559,7 +559,7 @@ async def select_santa_chat(update: Update, context: ContextTypes.DEFAULT_TYPE) 
 
     await context.bot.send_message(
         chat_id=chat.id,
-        text="The group is selected!\nYou can set schedule when Secret Santa joining should be locked.\nAfter this date and time users will be randomly assigned automatically.\nAlso you will be able to lock it manually.",
+        text="The group has been selected!\nLock and Start Santas distributing once all users joined.",
         parse_mode=ParseMode.HTML,
         reply_markup=reply_markup
     )
@@ -571,19 +571,22 @@ async def select_santa_chat(update: Update, context: ContextTypes.DEFAULT_TYPE) 
         )
     )
 
-    await context.bot.send_message(
+    msg = await context.bot.send_message(
         chat_id=chat_id,
         text=f"@{user.username} has launched Secret Santa activity\! Hurry up and join if you would like to participate\!",
         parse_mode=ParseMode.MARKDOWN_V2,
         reply_markup=reply_markup
     )
 
+    context.user_data["message"] = msg
+
 
 async def button_callbacks(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     message = update.effective_message
     query = update.callback_query
-    user = update.effective_user
+    user = query.from_user
     chat_id = context.user_data["chat_id"]
+    msg = context.user_data["message"]
 
     if query.data == "publish":
         await message.edit_text(
@@ -626,6 +629,11 @@ async def button_callbacks(update: Update, context: ContextTypes.DEFAULT_TYPE) -
         )
 
     elif query.data == "start_santa":
+        await context.bot.edit_message_reply_markup(
+            message_id=msg.id,
+            reply_markup=ReplyKeyboardRemove()
+        )
+
         await context.bot.send_message(
             chat_id=chat_id,
             text="Secret Santa has started!\nCheck your private chat with @wishmatch_bot.",
@@ -646,8 +654,8 @@ async def button_callbacks(update: Update, context: ContextTypes.DEFAULT_TYPE) -
         if "secret_santa_list" not in context.chat_data:
             context.chat_data["secret_santa_list"] = []
 
-        if query.from_user.id not in [user["user_id"] for user in context.chat_data["secret_santa_list"]]:
-            context.chat_data["secret_santa_list"].append({"user_id": query.from_user.id, "username": query.from_user.username})
+        if query.from_user.id not in [u["user_id"] for u in context.chat_data["secret_santa_list"]]:
+            context.chat_data["secret_santa_list"].append({"user_id": user.id, "username": user.username})
             await query.answer("Now you are participant!")
 
             reply_markup = InlineKeyboardMarkup.from_button(
