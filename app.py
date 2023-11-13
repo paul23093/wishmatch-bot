@@ -631,6 +631,7 @@ async def button_callbacks(update: Update, context: ContextTypes.DEFAULT_TYPE) -
     elif query.data == "start_santa":
         await context.bot.edit_message_reply_markup(
             message_id=msg.id,
+            chat_id=chat_id,
             reply_markup=ReplyKeyboardRemove()
         )
 
