@@ -545,20 +545,14 @@ async def select_santa_chat(update: Update, context: ContextTypes.DEFAULT_TYPE) 
     reply_markup = InlineKeyboardMarkup([
                 [
                     InlineKeyboardButton(
-                        text="Set Schedule",
-                        callback_data="schedule"
-                    )
-                ],
-                [
-                    InlineKeyboardButton(
                         text="Lock and Generate Santas",
-                        callback_data="lock"
+                        callback_data="start_santa"
                     )
                 ],
                 [
                     InlineKeyboardButton(
                         text="End Secret Santa",
-                        callback_data="close"
+                        callback_data="end_santa"
                     )
                 ]
             ])
@@ -584,16 +578,14 @@ async def select_santa_chat(update: Update, context: ContextTypes.DEFAULT_TYPE) 
         reply_markup=reply_markup
     )
 
-    context.job_queue.run_once(secret_santa_randomize, 10, chat_id=chat_id, name=str(chat_id))
 
-
-async def publish_secret_santa(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+async def button_callbacks(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     message = update.effective_message
     query = update.callback_query
     user = update.effective_user
+    chat_id = context.user_data["chat_id"]
 
     if query.data == "publish":
-        chat_id = context.user_data["chat_id"]
         await message.edit_text(
             text="The announcement has been published to the group.",
             parse_mode=ParseMode.HTML,
@@ -601,7 +593,7 @@ async def publish_secret_santa(update: Update, context: ContextTypes.DEFAULT_TYP
                 [
                     InlineKeyboardButton(
                         text="Set Schedule",
-                        callback_data="schedule"
+                        callback_data="set_schedule"
                     )
                 ],
                 [
@@ -633,6 +625,22 @@ async def publish_secret_santa(update: Update, context: ContextTypes.DEFAULT_TYP
             reply_markup=reply_markup
         )
 
+    elif query.data == "start_santa":
+        await context.bot.send_message(
+            chat_id=chat_id,
+            text="Secret Santa has started!\nCheck your private chat with @wishmatch_bot.",
+            parse_mode=ParseMode.HTML
+        )
+        await secret_santa_randomize(context)
+
+    elif query.data == "end_santa":
+        context.chat_data["secret_santa_list"] = []
+
+        await context.bot.send_message(
+            chat_id=chat_id,
+            text="Secret Santa ended.",
+            parse_mode=ParseMode.HTML
+        )
 
     elif query.data == "join":
         if "secret_santa_list" not in context.chat_data:
@@ -679,7 +687,7 @@ def main() -> None:
 
     application.add_handler(CommandHandler("santa", launch_secret_santa))
     application.add_handler(MessageHandler(filters.StatusUpdate.CHAT_SHARED, select_santa_chat))
-    application.add_handler(CallbackQueryHandler(publish_secret_santa))
+    application.add_handler(CallbackQueryHandler(button_callbacks))
 
     application.run_polling(allowed_updates=Update.ALL_TYPES)
 
