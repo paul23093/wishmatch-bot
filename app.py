@@ -589,38 +589,44 @@ async def select_santa_chat(update: Update, context: ContextTypes.DEFAULT_TYPE) 
     context.user_data["message"] = msg
 
 
-async def button_callbacks(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
-    message = update.effective_message
-    query = update.callback_query
-    user = query.from_user
+async def start_secret_santa(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     chat_id = context.user_data["chat_id"]
     msg = context.user_data["message"]
 
-    if query.data == "publish":
-        await message.edit_text(
-            text="The announcement has been published to the group.",
-            parse_mode=ParseMode.HTML,
-            reply_markup=InlineKeyboardMarkup([
-                [
-                    InlineKeyboardButton(
-                        text="Set Schedule",
-                        callback_data="set_schedule"
-                    )
-                ],
-                [
-                    InlineKeyboardButton(
-                        text="Lock and Generate Santas",
-                        callback_data="lock"
-                    )
-                ],
-                [
-                    InlineKeyboardButton(
-                        text="End Secret Santa",
-                        callback_data="close"
-                    )
-                ]
-            ])
-        )
+    await context.bot.edit_message_reply_markup(
+        message_id=msg.id,
+        chat_id=chat_id
+    )
+
+    await context.bot.send_message(
+        chat_id=chat_id,
+        text="Secret Santa has started!\nCheck your private chat with @wishmatch_bot.",
+        parse_mode=ParseMode.HTML
+    )
+    await secret_santa_randomize(context)
+
+
+async def end_secret_santa(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+    context.user_data["secret_santa_list"] = []
+    chat_id = context.user_data["chat_id"]
+
+    await context.bot.send_message(
+        chat_id=chat_id,
+        text="Secret Santa ended.",
+        parse_mode=ParseMode.HTML
+    )
+
+
+async def join_secret_santa(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+    query = update.callback_query
+    user = query.from_user
+
+    if "secret_santa_list" not in context.user_data:
+        context.user_data["secret_santa_list"] = []
+
+    if query.from_user.id not in [u["user_id"] for u in context.user_data["secret_santa_list"]]:
+        context.user_data["secret_santa_list"].append({"user_id": user.id, "username": user.username})
+        await query.answer("Now you are participant!")
 
         reply_markup = InlineKeyboardMarkup.from_button(
             button=InlineKeyboardButton(
@@ -629,57 +635,13 @@ async def button_callbacks(update: Update, context: ContextTypes.DEFAULT_TYPE) -
             )
         )
 
-        await context.bot.send_message(
-            chat_id=chat_id,
-            text=f"@{user.username} has launched Secret Santa activity! Hurry up and join if you would like to participate!",
+        await query.message.edit_text(
+            text=f"@{user.username} has launched Secret Santa activity! Hurry up and join if you would like to participate!\n\nParticipants: {', '.join([user['username'] for user in context.chat_data['secret_santa_list']])}",
             parse_mode=ParseMode.HTML,
             reply_markup=reply_markup
         )
-
-    elif query.data == "start_santa":
-        await context.bot.edit_message_reply_markup(
-            message_id=msg.id,
-            chat_id=chat_id
-        )
-
-        await context.bot.send_message(
-            chat_id=chat_id,
-            text="Secret Santa has started!\nCheck your private chat with @wishmatch_bot.",
-            parse_mode=ParseMode.HTML
-        )
-        await secret_santa_randomize(context)
-
-    elif query.data == "end_santa":
-        context.chat_data["secret_santa_list"] = []
-
-        await context.bot.send_message(
-            chat_id=chat_id,
-            text="Secret Santa ended.",
-            parse_mode=ParseMode.HTML
-        )
-
-    elif query.data == "join":
-        if "secret_santa_list" not in context.chat_data:
-            context.chat_data["secret_santa_list"] = []
-
-        if query.from_user.id not in [u["user_id"] for u in context.chat_data["secret_santa_list"]]:
-            context.chat_data["secret_santa_list"].append({"user_id": user.id, "username": user.username})
-            await query.answer("Now you are participant!")
-
-            reply_markup = InlineKeyboardMarkup.from_button(
-                button=InlineKeyboardButton(
-                    text="I'm in!",
-                    callback_data="join"
-                )
-            )
-
-            await query.message.edit_text(
-                text=f"@{user.username} has launched Secret Santa activity! Hurry up and join if you would like to participate!\n\nParticipants: {', '.join([user['username'] for user in context.chat_data['secret_santa_list']])}",
-                parse_mode=ParseMode.HTML,
-                reply_markup=reply_markup
-            )
-        else:
-            await query.answer("You are already participating")
+    else:
+        await query.answer("You are already participating")
 
 
 async def secret_santa_randomize(context: ContextTypes.DEFAULT_TYPE) -> None:
@@ -703,7 +665,9 @@ def main() -> None:
 
     application.add_handler(CommandHandler("santa", launch_secret_santa))
     application.add_handler(MessageHandler(filters.StatusUpdate.CHAT_SHARED, select_santa_chat))
-    application.add_handler(CallbackQueryHandler(button_callbacks))
+    application.add_handler(CallbackQueryHandler(join_secret_santa, pattern="join"))
+    application.add_handler(CallbackQueryHandler(start_secret_santa, pattern="start_santa"))
+    application.add_handler(CallbackQueryHandler(end_secret_santa, pattern="end_santa"))
 
     application.run_polling(allowed_updates=Update.ALL_TYPES)
 
