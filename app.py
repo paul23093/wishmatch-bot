@@ -626,9 +626,9 @@ async def join_secret_santa(update: Update, context: ContextTypes.DEFAULT_TYPE) 
     user = query.from_user
 
     if "secret_santa_list" not in context.chat_data:
-        context.user_data["secret_santa_list"] = []
+        context.chat_data["secret_santa_list"] = []
 
-    if query.from_user.id not in [u["user_id"] for u in context.chat_data["secret_santa_list"]]:
+    if user.id not in [u["user_id"] for u in context.chat_data["secret_santa_list"]]:
         context.chat_data["secret_santa_list"].append({"user_id": user.id, "username": user.username})
         await query.answer("Now you are participant!")
 
