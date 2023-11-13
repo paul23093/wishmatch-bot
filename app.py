@@ -1,5 +1,6 @@
 import nest_asyncio
 import random
+from itertools import cycle
 import base64
 import os
 import psycopg2
@@ -655,10 +656,14 @@ async def join_secret_santa(update: Update, context: ContextTypes.DEFAULT_TYPE) 
 async def secret_santa_randomize(context: ContextTypes.DEFAULT_TYPE) -> None:
     chat_id = context.user_data["chat_id"]
     data = context.bot_data[chat_id]
-    for user in data["secret_santa_list"]:
+    random.shuffle(data["secret_santa_list"])
+    data_cycle = cycle(data["secret_santa_list"])
+    next_elem = next(data_cycle)
+    for _ in range(len(data["secret_santa_list"])):
+        this_elem, next_elem = next_elem, next(data_cycle)
         await context.bot.send_message(
-            chat_id=user["user_id"],
-            text=f"You are Secret Santa for <a href='tg://user?id={user['user_id']}'>{user['username']}</a>. Check wishes in the webapp and gift a needed thing.",
+            chat_id=next_elem["user_id"],
+            text=f"You are Secret Santa for <a href='tg://user?id={this_elem['user_id']}'>{this_elem['username']}</a>. Check wishes in the webapp and gift a needed thing.",
             parse_mode=ParseMode.HTML
         )
 
