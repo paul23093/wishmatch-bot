@@ -540,10 +540,6 @@ async def select_santa_chat(update: Update, context: ContextTypes.DEFAULT_TYPE) 
 
     context.user_data["chat_id"] = chat_id
 
-    await message.edit_reply_markup(
-        reply_markup=ReplyKeyboardRemove()
-    )
-
     reply_markup = InlineKeyboardMarkup([
                 [
                     InlineKeyboardButton(
