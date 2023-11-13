@@ -1,5 +1,5 @@
 import nest_asyncio
-import json
+import random
 import base64
 import os
 import psycopg2
@@ -532,7 +532,6 @@ async def launch_secret_santa(update: Update, context: ContextTypes.DEFAULT_TYPE
     )
 
 
-
 async def select_santa_chat(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     message = update.effective_message
     chat = update.effective_chat
@@ -586,13 +585,13 @@ async def select_santa_chat(update: Update, context: ContextTypes.DEFAULT_TYPE) 
         reply_markup=reply_markup
     )
 
-    context.user_data["message"] = msg
+    context.chat_data[chat_id]["message"] = msg
 
 
 async def start_secret_santa(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     query = update.callback_query
     chat_id = context.user_data["chat_id"]
-    msg = context.user_data["message"]
+    msg = context.chat_data[chat_id]["message"]
 
     await context.bot.edit_message_reply_markup(
         message_id=msg.id,
@@ -610,8 +609,8 @@ async def start_secret_santa(update: Update, context: ContextTypes.DEFAULT_TYPE)
 
 async def end_secret_santa(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     query = update.callback_query
-    context.user_data["secret_santa_list"] = []
     chat_id = context.user_data["chat_id"]
+    context.chat_data[chat_id]["secret_santa_list"] = []
 
     await context.bot.send_message(
         chat_id=chat_id,
@@ -626,11 +625,11 @@ async def join_secret_santa(update: Update, context: ContextTypes.DEFAULT_TYPE) 
     query = update.callback_query
     user = query.from_user
 
-    if "secret_santa_list" not in context.user_data:
+    if "secret_santa_list" not in context.chat_data:
         context.user_data["secret_santa_list"] = []
 
-    if query.from_user.id not in [u["user_id"] for u in context.user_data["secret_santa_list"]]:
-        context.user_data["secret_santa_list"].append({"user_id": user.id, "username": user.username})
+    if query.from_user.id not in [u["user_id"] for u in context.chat_data["secret_santa_list"]]:
+        context.chat_data["secret_santa_list"].append({"user_id": user.id, "username": user.username})
         await query.answer("Now you are participant!")
 
         reply_markup = InlineKeyboardMarkup.from_button(
@@ -641,7 +640,7 @@ async def join_secret_santa(update: Update, context: ContextTypes.DEFAULT_TYPE) 
         )
 
         await query.message.edit_text(
-            text=f"@{user.username} has launched Secret Santa activity! Hurry up and join if you would like to participate!\n\nParticipants: {', '.join([user['username'] for user in context.user_data['secret_santa_list']])}",
+            text=f"@{user.username} has launched Secret Santa activity! Hurry up and join if you would like to participate!\n\nParticipants: {', '.join([user['username'] for user in context.chat_data['secret_santa_list']])}",
             parse_mode=ParseMode.HTML,
             reply_markup=reply_markup
         )
@@ -650,7 +649,8 @@ async def join_secret_santa(update: Update, context: ContextTypes.DEFAULT_TYPE) 
 
 
 async def secret_santa_randomize(context: ContextTypes.DEFAULT_TYPE) -> None:
-    data = context.user_data
+    chat_id = context.user_data["chat_id"]
+    data = context.chat_data[chat_id]
     for user in data["secret_santa_list"]:
         await context.bot.send_message(
             chat_id=user["user_id"],
@@ -664,7 +664,6 @@ def main() -> None:
 
     application.add_handler(CommandHandler("start", start))
     application.add_handler(CommandHandler("grant", grant_access))
-    # application.add_handler(CallbackQueryHandler(grant_access_inline))
     application.add_handler(CommandHandler("revoke", revoke_access))
     application.add_handler(CommandHandler("update_info", update_info))
 
