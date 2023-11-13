@@ -590,6 +590,7 @@ async def select_santa_chat(update: Update, context: ContextTypes.DEFAULT_TYPE) 
 
 
 async def start_secret_santa(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+    query = update.callback_query
     chat_id = context.user_data["chat_id"]
     msg = context.user_data["message"]
 
@@ -604,9 +605,11 @@ async def start_secret_santa(update: Update, context: ContextTypes.DEFAULT_TYPE)
         parse_mode=ParseMode.HTML
     )
     await secret_santa_randomize(context)
+    await query.answer()
 
 
 async def end_secret_santa(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+    query = update.callback_query
     context.user_data["secret_santa_list"] = []
     chat_id = context.user_data["chat_id"]
 
@@ -615,6 +618,8 @@ async def end_secret_santa(update: Update, context: ContextTypes.DEFAULT_TYPE) -
         text="Secret Santa ended.",
         parse_mode=ParseMode.HTML
     )
+
+    await query.answer()
 
 
 async def join_secret_santa(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
