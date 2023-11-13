@@ -646,7 +646,7 @@ async def button_callbacks(update: Update, context: ContextTypes.DEFAULT_TYPE) -
         if "secret_santa_list" not in context.chat_data:
             context.chat_data["secret_santa_list"] = []
 
-        if query.from_user.username not in context.chat_data["secret_santa_list"]:
+        if query.from_user.id not in [user["user_id"] for user in context.chat_data["secret_santa_list"]]:
             context.chat_data["secret_santa_list"].append({"user_id": query.from_user.id, "username": query.from_user.username})
             await query.answer("Now you are participant!")
 
