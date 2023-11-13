@@ -645,8 +645,8 @@ async def join_secret_santa(update: Update, context: ContextTypes.DEFAULT_TYPE) 
 
 
 async def secret_santa_randomize(context: ContextTypes.DEFAULT_TYPE) -> None:
-    chat_data = context.chat_data
-    for user in chat_data["secret_santa_list"]:
+    data = context.user_data
+    for user in data["secret_santa_list"]:
         await context.bot.send_message(
             chat_id=user["user_id"],
             text=f"You are Secret Santa for <a href='tg://user?id={user['user_id']}'>{user['username']}</a>. Check wishes in the webapp and gift a needed thing.",
