@@ -627,6 +627,7 @@ async def join_secret_santa(update: Update, context: ContextTypes.DEFAULT_TYPE) 
     chat = update.effective_chat
     query = update.callback_query
     user = query.from_user
+    msg = context.bot_data[chat.id]["message"]
 
     if "secret_santa_list" not in context.bot_data[chat.id]:
         context.bot_data[chat.id]["secret_santa_list"] = []
@@ -642,9 +643,8 @@ async def join_secret_santa(update: Update, context: ContextTypes.DEFAULT_TYPE) 
             )
         )
 
-        message_text = query.message.text
         await query.message.edit_text(
-            text=f"{message_text}\n\nParticipants: {', '.join([user['username'] for user in context.bot_data[chat.id]['secret_santa_list']])}",
+            text=f"{msg.text}\n\nParticipants: {', '.join([user['username'] for user in context.bot_data[chat.id]['secret_santa_list']])}",
             parse_mode=ParseMode.HTML,
             reply_markup=reply_markup
         )
