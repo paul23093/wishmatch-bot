@@ -139,7 +139,7 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
             web_app=WebAppInfo(
                 url=f"https://{os.environ.get('PG_HOST')}?chat_id={user.id}"
             )
-        )
+        ),
     )
 
     reply_markup = InlineKeyboardMarkup.from_button(
@@ -525,9 +525,9 @@ async def launch_secret_santa(update: Update, context: ContextTypes.DEFAULT_TYPE
     )
 
     await context.bot.send_message(
-        text='Please choose any group where you would like to launch Secret Santa\.',
+        text="Please choose any group where you would like to launch Secret Santa.",
         chat_id=chat.id,
-        parse_mode=ParseMode.MARKDOWN_V2,
+        parse_mode=ParseMode.HTML,
         reply_markup=reply_markup
     )
 
@@ -542,11 +542,32 @@ async def select_santa_chat(update: Update, context: ContextTypes.DEFAULT_TYPE) 
 
     await message.delete()
 
+    reply_markup = InlineKeyboardMarkup([
+                [
+                    InlineKeyboardButton(
+                        text="Set Schedule",
+                        callback_data="schedule"
+                    )
+                ],
+                [
+                    InlineKeyboardButton(
+                        text="Lock and Generate Santas",
+                        callback_data="lock"
+                    )
+                ],
+                [
+                    InlineKeyboardButton(
+                        text="End Secret Santa",
+                        callback_data="close"
+                    )
+                ]
+            ])
+
     await context.bot.send_message(
         chat_id=chat.id,
-        text="The group is selected\!\nYou can set schedule when Secret Santa joining should be locked\.\nAfter this date and time users will be randomly assigned automatically\.\nAlso you will be able to lock it manually\.",
-        parse_mode=ParseMode.MARKDOWN_V2,
-        reply_markup=ReplyKeyboardRemove()
+        text="The group is selected!\nYou can set schedule when Secret Santa joining should be locked.\nAfter this date and time users will be randomly assigned automatically.\nAlso you will be able to lock it manually.",
+        parse_mode=ParseMode.HTML,
+        reply_markup=reply_markup
     )
 
     reply_markup = InlineKeyboardMarkup.from_button(
