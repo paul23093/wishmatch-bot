@@ -557,10 +557,13 @@ async def select_santa_chat(update: Update, context: ContextTypes.DEFAULT_TYPE) 
                 ]
             ])
 
-    await context.bot.send_message(
+    msg = await context.bot.send_message(
         chat_id=chat.id,
         text="The group has been selected!\nLock and Start Santas distributing once all users joined.",
-        parse_mode=ParseMode.HTML,
+        parse_mode=ParseMode.HTML
+    )
+
+    await msg.edit_reply_markup(
         reply_markup=reply_markup
     )
 
