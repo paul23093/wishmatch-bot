@@ -604,6 +604,9 @@ async def start_secret_santa(update: Update, context: ContextTypes.DEFAULT_TYPE)
         parse_mode=ParseMode.HTML
     )
     await secret_santa_randomize(context)
+
+    context.bot_data[chat_id]["secret_santa_list"] = []
+
     await query.answer()
 
 
