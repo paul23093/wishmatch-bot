@@ -549,12 +549,6 @@ async def select_santa_chat(update: Update, context: ContextTypes.DEFAULT_TYPE) 
                         text="Lock and Generate Santas",
                         callback_data="start_santa"
                     )
-                ],
-                [
-                    InlineKeyboardButton(
-                        text="End Secret Santa",
-                        callback_data="end_santa"
-                    )
                 ]
             ])
 
@@ -601,6 +595,8 @@ async def start_secret_santa(update: Update, context: ContextTypes.DEFAULT_TYPE)
             message_id=msg.id,
             chat_id=chat_id
         )
+
+    await query.message.edit_reply_markup()
 
     await context.bot.send_message(
         chat_id=chat_id,
