@@ -596,10 +596,11 @@ async def start_secret_santa(update: Update, context: ContextTypes.DEFAULT_TYPE)
     chat_id = context.user_data["chat_id"]
     msg = context.bot_data[chat_id]["message"]
 
-    await context.bot.edit_message_reply_markup(
-        message_id=msg.id,
-        chat_id=chat_id
-    )
+    if msg.reply_markup:
+        await context.bot.edit_message_reply_markup(
+            message_id=msg.id,
+            chat_id=chat_id
+        )
 
     await context.bot.send_message(
         chat_id=chat_id,
