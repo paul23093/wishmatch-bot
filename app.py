@@ -634,40 +634,37 @@ async def join_secret_santa(update: Update, context: ContextTypes.DEFAULT_TYPE) 
     if "secret_santa_list" not in context.bot_data[chat.id]:
         context.bot_data[chat.id]["secret_santa_list"] = []
 
-    # if user.id not in [u["user_id"] for u in context.bot_data[chat.id]["secret_santa_list"]]:
-    context.bot_data[chat.id]["secret_santa_list"].append({"user_id": user.id, "username": user.username})
-    await query.answer("Now you are participant!")
+    if user.id not in [u["user_id"] for u in context.bot_data[chat.id]["secret_santa_list"]]:
+        context.bot_data[chat.id]["secret_santa_list"].append({"user_id": user.id, "username": user.username})
+        await query.answer("Now you are participant!")
 
-    reply_markup = InlineKeyboardMarkup.from_button(
-        button=InlineKeyboardButton(
-            text="I'm in!",
-            callback_data="join"
+        reply_markup = InlineKeyboardMarkup.from_button(
+            button=InlineKeyboardButton(
+                text="I'm in!",
+                callback_data="join"
+            )
         )
-    )
 
-    await query.message.edit_text(
-        text=f"{msg.text}\n\nParticipants: {', '.join([user['username'] for user in context.bot_data[chat.id]['secret_santa_list']])}",
-        parse_mode=ParseMode.HTML,
-        reply_markup=reply_markup
-    )
-    # else:
-    #     await query.answer("You are already participating")
+        await query.message.edit_text(
+            text=f"{msg.text}\n\nParticipants: {', '.join([user['username'] for user in context.bot_data[chat.id]['secret_santa_list']])}",
+            parse_mode=ParseMode.HTML,
+            reply_markup=reply_markup
+        )
+    else:
+        await query.answer("You are already participating")
 
 
 async def secret_santa_randomize(context: ContextTypes.DEFAULT_TYPE) -> None:
     chat_id = context.user_data["chat_id"]
     data = context.bot_data[chat_id]
-    print(data["secret_santa_list"])
     random.shuffle(data["secret_santa_list"])
     data_cycle = cycle(data["secret_santa_list"])
     next_elem = next(data_cycle)
     for _ in range(len(data["secret_santa_list"])):
         this_elem, next_elem = next_elem, next(data_cycle)
-        print(this_elem)
-        print(next_elem)
         await context.bot.send_message(
             chat_id=next_elem["user_id"],
-            text=f"You are Secret Santa for <a href='tg://user?id={this_elem['user_id']}'>{this_elem['username']}</a>. Check wishes in the webapp and gift a needed thing.",
+            text=f"You are Secret Santa for @{this_elem['username']}. Check wishes in the webapp and gift a needed thing.",
             parse_mode=ParseMode.HTML
         )
 
