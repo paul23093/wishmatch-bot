@@ -634,24 +634,24 @@ async def join_secret_santa(update: Update, context: ContextTypes.DEFAULT_TYPE) 
     if "secret_santa_list" not in context.bot_data[chat.id]:
         context.bot_data[chat.id]["secret_santa_list"] = []
 
-    if user.id in [u["user_id"] for u in context.bot_data[chat.id]["secret_santa_list"]]:
-        context.bot_data[chat.id]["secret_santa_list"].append({"user_id": user.id, "username": user.username})
-        await query.answer("Now you are participant!")
+    # if user.id not in [u["user_id"] for u in context.bot_data[chat.id]["secret_santa_list"]]:
+    context.bot_data[chat.id]["secret_santa_list"].append({"user_id": user.id, "username": user.username})
+    await query.answer("Now you are participant!")
 
-        reply_markup = InlineKeyboardMarkup.from_button(
-            button=InlineKeyboardButton(
-                text="I'm in!",
-                callback_data="join"
-            )
+    reply_markup = InlineKeyboardMarkup.from_button(
+        button=InlineKeyboardButton(
+            text="I'm in!",
+            callback_data="join"
         )
+    )
 
-        await query.message.edit_text(
-            text=f"{msg.text}\n\nParticipants: {', '.join([user['username'] for user in context.bot_data[chat.id]['secret_santa_list']])}",
-            parse_mode=ParseMode.HTML,
-            reply_markup=reply_markup
-        )
-    else:
-        await query.answer("You are already participating")
+    await query.message.edit_text(
+        text=f"{msg.text}\n\nParticipants: {', '.join([user['username'] for user in context.bot_data[chat.id]['secret_santa_list']])}",
+        parse_mode=ParseMode.HTML,
+        reply_markup=reply_markup
+    )
+    # else:
+    #     await query.answer("You are already participating")
 
 
 async def secret_santa_randomize(context: ContextTypes.DEFAULT_TYPE) -> None:
