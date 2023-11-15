@@ -610,20 +610,6 @@ async def start_secret_santa(update: Update, context: ContextTypes.DEFAULT_TYPE)
     await query.answer()
 
 
-async def end_secret_santa(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
-    query = update.callback_query
-    chat_id = context.user_data["chat_id"]
-    context.bot_data[chat_id]["secret_santa_list"] = []
-
-    await context.bot.send_message(
-        chat_id=chat_id,
-        text="Secret Santa ended.",
-        parse_mode=ParseMode.HTML
-    )
-
-    await query.answer()
-
-
 async def join_secret_santa(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     chat = update.effective_chat
     query = update.callback_query
@@ -680,7 +666,6 @@ def main() -> None:
     application.add_handler(MessageHandler(filters.StatusUpdate.CHAT_SHARED, select_santa_chat))
     application.add_handler(CallbackQueryHandler(join_secret_santa, pattern="join"))
     application.add_handler(CallbackQueryHandler(start_secret_santa, pattern="start_santa"))
-    application.add_handler(CallbackQueryHandler(end_secret_santa, pattern="end_santa"))
 
     application.run_polling(allowed_updates=Update.ALL_TYPES)
 
