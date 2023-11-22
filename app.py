@@ -568,7 +568,7 @@ async def select_santa_chat(update: Update, context: ContextTypes.DEFAULT_TYPE) 
 
     reply_markup = InlineKeyboardMarkup.from_button(
         button=InlineKeyboardButton(
-            text="I'm in!",
+            text="Join | Leave",
             callback_data="join"
         )
     )
@@ -621,22 +621,24 @@ async def join_secret_santa(update: Update, context: ContextTypes.DEFAULT_TYPE) 
 
     if user.id not in [u["user_id"] for u in context.bot_data[chat.id]["secret_santa_list"]]:
         context.bot_data[chat.id]["secret_santa_list"].append({"user_id": user.id, "username": user.username})
-        await query.answer("Now you are participant!")
+        await query.answer("Now you are in!")
 
-        reply_markup = InlineKeyboardMarkup.from_button(
-            button=InlineKeyboardButton(
-                text="I'm in!",
-                callback_data="join"
-            )
-        )
-
-        await query.message.edit_text(
-            text=f"{msg.text}\n\nParticipants: {', '.join([user['username'] for user in context.bot_data[chat.id]['secret_santa_list']])}",
-            parse_mode=ParseMode.HTML,
-            reply_markup=reply_markup
-        )
     else:
-        await query.answer("You are already participating")
+        context.bot_data[chat.id]["secret_santa_list"].remove({"user_id": user.id, "username": user.username})
+        await query.answer("You left this activity")
+
+    reply_markup = InlineKeyboardMarkup.from_button(
+        button=InlineKeyboardButton(
+            text="Join | Leave",
+            callback_data="join"
+        )
+    )
+
+    await query.message.edit_text(
+        text=f"{msg.text}\n\nParticipants: {', '.join([user['username'] for user in context.bot_data[chat.id]['secret_santa_list']]) if context.bot_data[chat.id]['secret_santa_list'] else '-'}",
+        parse_mode=ParseMode.HTML,
+        reply_markup=reply_markup
+    )
 
 
 async def secret_santa_randomize(context: ContextTypes.DEFAULT_TYPE) -> None:
