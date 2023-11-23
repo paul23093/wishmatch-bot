@@ -621,12 +621,12 @@ async def join_secret_santa(update: Update, context: ContextTypes.DEFAULT_TYPE) 
         context.bot_data[chat.id]["secret_santa_list"] = []
 
     if user.id not in [u["user_id"] for u in context.bot_data[chat.id]["secret_santa_list"]]:
-        context.bot_data[chat.id]["secret_santa_list"].append({"user_id": user.id, "username": user.username})
         try:
             await context.bot.send_message(
                 chat_id=user.id,
                 text="Great! You are able to receive messages from this bot and ready for Secret Santa activity!"
             )
+            context.bot_data[chat.id]["secret_santa_list"].append({"user_id": user.id, "username": user.username})
             await query.answer("Now you are in!")
         except TelegramError:
             await query.answer("Please start this bot in private chat.")
