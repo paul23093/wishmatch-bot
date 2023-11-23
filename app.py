@@ -575,7 +575,7 @@ async def select_santa_chat(update: Update, context: ContextTypes.DEFAULT_TYPE) 
 
     msg = await context.bot.send_message(
         chat_id=chat_id,
-        text=f"@{user.username} has launched Secret Santa activity! Hurry up and join if you would like to participate!\n\n *!!!* Don't forget to star* @wishmatch_bot",
+        text=f"@{user.username} has launched Secret Santa activity! Hurry up and join if you would like to participate!\n\n <b>Don't forget to start @wishmatch_bot</b>",
         parse_mode=ParseMode.HTML,
         reply_markup=reply_markup
     )
