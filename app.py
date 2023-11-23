@@ -8,6 +8,7 @@ from telegram import Update, InlineKeyboardMarkup, InlineKeyboardButton, WebAppI
     ReplyKeyboardRemove, KeyboardButton, MenuButtonWebApp, KeyboardButtonRequestChat, ChatAdministratorRights
 from telegram.ext import ApplicationBuilder, CommandHandler, ContextTypes, CallbackQueryHandler, ConversationHandler, \
     MessageHandler, filters
+from telegram.error import TelegramError
 from telegram.constants import ParseMode
 from dotenv import load_dotenv
 
@@ -575,7 +576,7 @@ async def select_santa_chat(update: Update, context: ContextTypes.DEFAULT_TYPE) 
 
     msg = await context.bot.send_message(
         chat_id=chat_id,
-        text=f"@{user.username} has launched Secret Santa activity! Hurry up and join if you would like to participate!\n\n <b>Don't forget to start @wishmatch_bot</b>",
+        text=f"@{user.username} has launched Secret Santa activity! Hurry up and join if you would like to participate!",
         parse_mode=ParseMode.HTML,
         reply_markup=reply_markup
     )
@@ -621,7 +622,14 @@ async def join_secret_santa(update: Update, context: ContextTypes.DEFAULT_TYPE) 
 
     if user.id not in [u["user_id"] for u in context.bot_data[chat.id]["secret_santa_list"]]:
         context.bot_data[chat.id]["secret_santa_list"].append({"user_id": user.id, "username": user.username})
-        await query.answer("Now you are in!")
+        try:
+            await context.bot.send_message(
+                chat_id=user.id,
+                text="Great! You are able to receive messages from this bot and ready for Secret Santa activity!"
+            )
+            await query.answer("Now you are in!")
+        except TelegramError:
+            await query.answer("Please start this bot in private chat.")
 
     else:
         context.bot_data[chat.id]["secret_santa_list"].remove({"user_id": user.id, "username": user.username})
