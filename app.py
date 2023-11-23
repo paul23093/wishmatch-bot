@@ -621,7 +621,7 @@ async def join_secret_santa(update: Update, context: ContextTypes.DEFAULT_TYPE) 
         user_id=user.id
     )
 
-    await query.answer(user_info.status)
+    await query.answer(user_info.RESTRICTED)
 
     if "secret_santa_list" not in context.bot_data[chat.id]:
         context.bot_data[chat.id]["secret_santa_list"] = []
