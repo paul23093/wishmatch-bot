@@ -575,8 +575,8 @@ async def select_santa_chat(update: Update, context: ContextTypes.DEFAULT_TYPE) 
 
     msg = await context.bot.send_message(
         chat_id=chat_id,
-        text=f"@{user.username} has launched Secret Santa activity\! Hurry up and join if you would like to participate\!",
-        parse_mode=ParseMode.MARKDOWN_V2,
+        text=f"@{user.username} has launched Secret Santa activity! Hurry up and join if you would like to participate!\n\n *!!!* Don't forget to star* @wishmatch_bot",
+        parse_mode=ParseMode.HTML,
         reply_markup=reply_markup
     )
 
@@ -615,13 +615,6 @@ async def join_secret_santa(update: Update, context: ContextTypes.DEFAULT_TYPE) 
     query = update.callback_query
     user = query.from_user
     msg = context.bot_data[chat.id]["message"]
-
-    user_info = await context.bot.get_chat_member(
-        chat_id=user.id,
-        user_id=user.id
-    )
-
-    await query.answer(user_info.RESTRICTED)
 
     if "secret_santa_list" not in context.bot_data[chat.id]:
         context.bot_data[chat.id]["secret_santa_list"] = []
