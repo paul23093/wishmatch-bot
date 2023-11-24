@@ -624,7 +624,9 @@ async def join_secret_santa(update: Update, context: ContextTypes.DEFAULT_TYPE) 
         try:
             await context.bot.send_message(
                 chat_id=user.id,
-                text="Great! You are able to receive messages from this bot and ready for Secret Santa activity!"
+                text=f"Great! You have joined Secret Santa activity in <b>{chat.title}</b>.\n"
+                     f"Once the activity starts, you will get your secret recipient here.",
+                parse_mode=ParseMode.HTML
             )
             context.bot_data[chat.id]["secret_santa_list"].append({"user_id": user.id, "username": user.username})
             await query.answer("Now you are in!")
