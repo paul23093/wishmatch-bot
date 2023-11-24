@@ -547,7 +547,7 @@ async def select_santa_chat(update: Update, context: ContextTypes.DEFAULT_TYPE) 
     reply_markup = InlineKeyboardMarkup([
                 [
                     InlineKeyboardButton(
-                        text="Lock and Generate Santas",
+                        text="Lock the list and draw lots",
                         callback_data="start_santa"
                     )
                 ]
