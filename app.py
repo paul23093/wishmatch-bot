@@ -562,7 +562,7 @@ async def select_santa_chat(update: Update, context: ContextTypes.DEFAULT_TYPE) 
 
     await context.bot.send_message(
         chat_id=chat.id,
-        text="Lock and Start Santas distributing once all users joined.",
+        text="Lock the list of recipients and draw lots once all users joined.",
         parse_mode=ParseMode.HTML,
         reply_markup=reply_markup
     )
