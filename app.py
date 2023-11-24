@@ -601,7 +601,7 @@ async def start_secret_santa(update: Update, context: ContextTypes.DEFAULT_TYPE)
 
     await context.bot.send_message(
         chat_id=chat_id,
-        text="Secret Santa has started!\nCheck your private chat with @wishmatch_bot.",
+        text="Secret Santa has been started!\nCheck your private chat with @wishmatch_bot.",
         parse_mode=ParseMode.HTML
     )
     await secret_santa_randomize(context)
