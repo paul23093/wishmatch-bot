@@ -624,7 +624,8 @@ async def join_secret_santa(update: Update, context: ContextTypes.DEFAULT_TYPE) 
         try:
             await context.bot.send_message(
                 chat_id=user.id,
-                text=f"Great! You have joined Secret Santa activity in <b>{chat.title}</b>.\n"
+                text=f"Great! You have joined Secret Santa activity in "
+                     f"<b><a href='https://t.me/c/{str(chat.id)[4:]}'>{chat.title}</a></b>.\n"
                      f"Once the activity starts, you will get your secret recipient here.",
                 parse_mode=ParseMode.HTML
             )
