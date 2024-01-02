@@ -165,11 +165,19 @@ For better interaction it is recommended to pin this message\. In this way you a
     )
 
 
-async def open_webapp(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
-    await context.bot.send_message(
-        chat_id=42104955,
-        text="Webapp has been opened."
-    )
+async def update_menu_button(context: ContextTypes.DEFAULT_TYPE) -> None:
+    with psycopg2.connect(**con) as conn:
+        cur = conn.cursor()
+        cur.execute(f"""
+            select tg_user_id
+            from users
+            ;
+        """)
+        users = [dict((cur.description[i][0], value) for i, value in enumerate(row)) for row in cur.fetchall()]
+    for user in users:
+        await context.bot.set_chat_menu_button(
+            chat_id=user["tg_user_id"]
+        )
 
 
 async def grant_access(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
@@ -682,12 +690,12 @@ def main() -> None:
     application.add_handler(CommandHandler("grant", grant_access))
     application.add_handler(CommandHandler("revoke", revoke_access))
     application.add_handler(CommandHandler("update_info", update_info))
+    application.add_handler(CommandHandler("update_menu_button", update_menu_button))
 
     application.add_handler(CommandHandler("santa", launch_secret_santa))
     application.add_handler(MessageHandler(filters.StatusUpdate.CHAT_SHARED, select_santa_chat))
     application.add_handler(CallbackQueryHandler(join_secret_santa, pattern="join"))
     application.add_handler(CallbackQueryHandler(start_secret_santa, pattern="start_santa"))
-    application.add_handler(CallbackQueryHandler(open_webapp, pattern="open_webapp"))
 
     application.run_polling(allowed_updates=Update.ALL_TYPES)
 
