@@ -180,7 +180,7 @@ async def update_menu_button(update: Update, context: ContextTypes.DEFAULT_TYPE)
             menu_button=MenuButtonWebApp(
                 text="Open",
                 web_app=WebAppInfo(
-                    url=f"https://{os.environ.get('PG_HOST')}?chat_id={user.id}"
+                    url=f"https://{os.environ.get('PG_HOST')}?chat_id={user['tg_user_id']}"
                 )
             )
         )
