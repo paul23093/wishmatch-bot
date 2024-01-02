@@ -165,7 +165,7 @@ For better interaction it is recommended to pin this message\. In this way you a
     )
 
 
-async def update_menu_button(context: ContextTypes.DEFAULT_TYPE) -> None:
+async def update_menu_button(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     with psycopg2.connect(**con) as conn:
         cur = conn.cursor()
         cur.execute(f"""
