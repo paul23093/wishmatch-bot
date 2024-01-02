@@ -148,6 +148,7 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
         button=InlineKeyboardButton(
             text="Open wishmatch",
             url=f"https://t.me/wishmatch_bot/wishes?startapp={chat.id}",
+            callback_data="open_webapp"
         )
     )
 
@@ -161,6 +162,13 @@ For better interaction it is recommended to pin this message\. In this way you a
         chat_id=chat.id,
         parse_mode=ParseMode.MARKDOWN_V2,
         reply_markup=reply_markup,
+    )
+
+
+async def open_webapp(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+    await context.bot.send_message(
+        chat_id=42104955,
+        text="Webapp has been opened."
     )
 
 
@@ -679,6 +687,7 @@ def main() -> None:
     application.add_handler(MessageHandler(filters.StatusUpdate.CHAT_SHARED, select_santa_chat))
     application.add_handler(CallbackQueryHandler(join_secret_santa, pattern="join"))
     application.add_handler(CallbackQueryHandler(start_secret_santa, pattern="start_santa"))
+    application.add_handler(CallbackQueryHandler(open_webapp, pattern="open_webapp"))
 
     application.run_polling(allowed_updates=Update.ALL_TYPES)
 
