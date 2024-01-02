@@ -176,7 +176,13 @@ async def update_menu_button(update: Update, context: ContextTypes.DEFAULT_TYPE)
         users = [dict((cur.description[i][0], value) for i, value in enumerate(row)) for row in cur.fetchall()]
     for user in users:
         await context.bot.set_chat_menu_button(
-            chat_id=user["tg_user_id"]
+            chat_id=user["tg_user_id"],
+            menu_button=MenuButtonWebApp(
+                text="Open",
+                web_app=WebAppInfo(
+                    url=f"https://{os.environ.get('PG_HOST')}?chat_id={user.id}"
+                )
+            )
         )
 
 
