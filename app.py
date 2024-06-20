@@ -16,7 +16,7 @@ load_dotenv()
 
 nest_asyncio.apply()
 
-token = os.environ.get("TOKEN")
+token = os.environ.get("BOT_TOKEN")
 
 con = {
     'host': os.environ.get("PG_HOST"),
